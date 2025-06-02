@@ -1,0 +1,17 @@
+[project]
+name = "xieshui"
+version = "0.1.0"
+description = "面向教与学的 Agent 系统原型"
+authors = [
+    { name = "LifeCheckpoint" },
+    { name = "Meguru-Deng" },
+    { name = "Ripanier" },
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1.1",
+    "flask-cors>=6.0.0",
+    "langchain>=0.3.25",
+    "pymupdf>=1.26.0",
+]
