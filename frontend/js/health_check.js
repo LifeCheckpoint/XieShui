@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkHealthBtn = document.getElementById('checkHealthBtn');
     const statusDisplay = document.getElementById('statusDisplay');
 
-    const backendUrl = 'http://127.0.0.1:7222/health'; // 确保这里的URL和端口与你的后端服务一致
+    const backendUrl = 'http://127.0.0.1:7222/health'; // 后端服务 URL
+    // const backendUrl = 'http://localhost:7222/health'; // 或使用 localhost
 
     checkHealthBtn.addEventListener('click', async () => {
         statusDisplay.innerHTML = '<p>正在检查...</p>';
