@@ -22,4 +22,16 @@ cd frontend-react
 npm install
 ```
 
-安装前端依赖
+## Launch
+
+### 运行后端
+
+```bash
+uv run backend/app.py
+```
+
+### 运行前端
+
+```bash
+npm --prefix "frontend-react" run dev
+```
