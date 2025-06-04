@@ -104,12 +104,6 @@ const WelcomePage = () => {
               opacity: 0 // 初始状态为透明
             }}
           >
-            {/* <Typography variant="h3" gutterBottom>
-              欢迎使用 XieShui 系统
-            </Typography>
-            <Typography variant="body1" paragraph>
-              您已成功登录系统
-            </Typography> */}
             <Box sx={{ width: '100%', maxWidth: 800, margin: '40px auto' }}>
               <ChatContainer />
             </Box>

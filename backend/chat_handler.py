@@ -1,50 +1,83 @@
 import json
-import time
+from typing import List
 
-def generate_chat_response(history, current_text, current_image_paths):
-    print(f"收到 Chat: text={current_text}, images={len(current_image_paths)}, len(history)={len(history)}")
-    
-    # 模拟流式响应生成器
+using_debug = False
+
+def debug_output(func):
+    """
+    装饰器，用于在调试模式下 debug 调用
+    """
+    def wrapper(*args, **kwargs):
+        if not using_debug:
+            return func(*args, **kwargs)
+        else:
+            print(f"CALL: {func.__name__}, ARGS: {args}, {kwargs}")
+            result = func(*args, **kwargs)
+            print(f"FROM {func.__name__} RETURN: {result}")
+            return result
+    return wrapper
+
+@debug_output
+def send_agent_msg(status: str, message: str):
+    """
+    生成 Agent 状态消息
+
+    使用方式：
+    ```python
+    yield set_agent_status("Agent 状态", "附加信息")
+    ```
+    """
+    event = {
+        "type": "agent_status",
+        "content": {"status": status, "message": message}
+    }
+    return "data: " + json.dumps(event) + "\n\n"
+
+@debug_output
+def send_text_msg(text: str):
+    """
+    生成文本消息
+
+    使用方式：
+    ```python
+    yield set_text("文本内容")
+    ```
+    """
+    event = {
+        "type": "text",
+        "content": {"data": text}
+    }
+    return "data: " + json.dumps(event) + "\n\n"
+
+@debug_output
+def send_stop_msg(reason: str = "normal"):
+    """
+    生成停止消息
+
+    使用方式：
+    ```python
+    yield set_stop("中止原因")
+    ```
+    """
+    event = {
+        "type": "stop",
+        "content": {"reason": reason}
+    }
+    return "data: " + json.dumps(event) + "\n\n"
+
+def route_chat(
+        history: List,
+        current_text: str,
+        current_image_paths: List
+    ):
+    """
+    ## 路由聊天内容
+
+    所有聊天内容都会被发送到这里进行处理。
+    """
     def generate():
         try:
-            # 发送Agent状态
-            event = {
-                "type": "agent_status",
-                "content": {"status": "processing", "message": "正在处理请求..."}
-            }
-            print(f"发送事件: {event}")
-            yield "data: " + json.dumps(event) + "\n\n"
-            
-            time.sleep(0.1)  # 缩短模拟延迟
-            
-            # 发送文本片段
-            event = {
-                "type": "text",
-                "content": {"data": "这是模拟回复的第一部分。"}
-            }
-            print(f"发送事件: {event}")
-            yield "data: " + json.dumps(event) + "\n\n"
-            
-            time.sleep(0.1)
-            
-            event = {
-                "type": "text",
-                "content": {"data": "这是模拟回复的第二部分。"}
-            }
-            print(f"发送事件: {event}")
-            yield "data: " + json.dumps(event) + "\n\n"
-            
-            time.sleep(0.1)
-            
-            # 发送停止标识
-            event = {
-                "type": "stop",
-                "content": {"reason": "normal"}
-            }
-            print(f"发送事件: {event}")
-            yield "data: " + json.dumps(event) + "\n\n"
-            
-            print("SSE流发送完成")
+            pass
         except Exception as e:
             print(f"生成SSE流时出错: {str(e)}")
     

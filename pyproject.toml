@@ -13,6 +13,7 @@ dependencies = [
     "flask>=3.1.1",
     "flask-cors>=6.0.0",
     "flask-sqlalchemy>=3.1.1",
-    "langchain>=0.3.25",
+    "langchain-community>=0.3.24",
+    "langchain[openai]>=0.3.25",
     "pymupdf>=1.26.0",
 ]

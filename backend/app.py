@@ -9,7 +9,7 @@ from flask_cors import CORS
 from extensions import db
 from auth import register_user, login_user
 from image_upload import handle_image_upload
-from chat_handler import generate_chat_response
+from chat_handler import route_chat
 import traceback
 import os
 
@@ -80,7 +80,7 @@ def chat():
         current_image_paths = data.get('current_image_paths', [])
         
         return Response(
-            generate_chat_response(history, current_text, current_image_paths),
+            route_chat(history, current_text, current_image_paths),
             mimetype='text/event-stream'
         )
         

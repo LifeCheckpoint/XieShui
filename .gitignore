@@ -195,3 +195,9 @@ cython_debug/
 
 # Obsidian
 .obsidian/
+
+# VSCodeCounter
+.VSCodeCounter/
+
+# API Key
+backend/langplatform/api_key.json
