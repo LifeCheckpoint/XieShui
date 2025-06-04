@@ -1,3 +1,16 @@
+// 导入Material UI组件
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
@@ -61,103 +74,124 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container">
-      <h1>XieShui 登录/注册</h1>
-      
-      <div className="tabs">
-        <button 
-          className={`tab ${activeTab === 'login' ? 'active' : ''}`} 
-          onClick={() => setActiveTab('login')}
-        >
-          登录
-        </button>
-        <button 
-          className={`tab ${activeTab === 'register' ? 'active' : ''}`} 
-          onClick={() => setActiveTab('register')}
-        >
-          注册
-        </button>
-      </div>
-      
-      <div className="form-wrapper">
-        <div className={`form-container login-form ${activeTab === 'login' ? 'active' : ''}`}>
-          <form onSubmit={handleLoginSubmit}>
-            <div className="form-group">
-              <label htmlFor="loginIdentifier">学号/ID 或 用户名:</label>
-              <input
-                type="text"
-                id="loginIdentifier"
-                value={loginData.identifier}
-                onChange={(e) => setLoginData({...loginData, identifier: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="loginPassword">密码:</label>
-              <input
-                type="password"
-                id="loginPassword"
-                value={loginData.password}
-                onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-              />
-            </div>
-            <button type="submit">登录</button>
-          </form>
-        </div>
+    <Box sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#f5f5f5',
+      padding: 2
+    }}>
+      <Container maxWidth="sm" sx={{ position: 'relative' }}>
+        {/* 选项卡放在顶部 */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            variant="fullWidth"
+            sx={{ width: '100%' }}
+          >
+            <Tab label="登录" value="login" />
+            <Tab label="注册" value="register" />
+          </Tabs>
+        </Box>
         
-        <div className={`form-container register-form ${activeTab === 'register' ? 'active' : ''}`}>
-          <form onSubmit={handleRegisterSubmit}>
-            <div className="form-group">
-              <label htmlFor="registerId">学号/ID:</label>
-              <input
-                type="text"
-                id="registerId"
-                value={registerData.id}
-                onChange={(e) => setRegisterData({...registerData, id: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="registerUsername">用户名:</label>
-              <input
-                type="text"
-                id="registerUsername"
-                value={registerData.username}
-                onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="registerPassword">密码 (学生/教师可为空):</label>
-              <input
-                type="password"
-                id="registerPassword"
-                value={registerData.password}
-                onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="registerRole">角色:</label>
-              <select
-                id="registerRole"
-                value={registerData.role}
-                onChange={(e) => setRegisterData({...registerData, role: e.target.value})}
-                required
-              >
-                <option value="student">学生</option>
-                <option value="teacher">教师</option>
-                <option value="admin">系统管理员</option>
-              </select>
-            </div>
-            <button type="submit">注册</button>
-          </form>
-        </div>
-      </div>
-      
-      <div className={`message-area ${message.type}`}>
-        {message.text}
-      </div>
-    </div>
+        {/* 简化布局，移除动画 */}
+        <Box sx={{ mb: 3 }}>
+          {activeTab === 'login' ? (
+            <Paper elevation={3} sx={{ padding: 3 }}>
+              <Typography variant="h5" align="center" gutterBottom>
+                登录 XieShui
+              </Typography>
+              <Box component="form" onSubmit={handleLoginSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="学号/ID 或 用户名"
+                  id="loginIdentifier"
+                  value={loginData.identifier}
+                  onChange={(e) => setLoginData({...loginData, identifier: e.target.value})}
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="密码"
+                  id="loginPassword"
+                  type="password"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                  fullWidth
+                />
+                <Button type="submit" variant="contained" color="primary">
+                  登录
+                </Button>
+              </Box>
+            </Paper>
+          ) : (
+            <Paper elevation={3} sx={{ padding: 3 }}>
+              <Typography variant="h5" align="center" gutterBottom>
+                注册 XieShui
+              </Typography>
+              <Box component="form" onSubmit={handleRegisterSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="学号/ID"
+                  id="registerId"
+                  value={registerData.id}
+                  onChange={(e) => setRegisterData({...registerData, id: e.target.value})}
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="用户名"
+                  id="registerUsername"
+                  value={registerData.username}
+                  onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="密码 (学生/教师可为空)"
+                  id="registerPassword"
+                  type="password"
+                  value={registerData.password}
+                  onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                  fullWidth
+                />
+                <FormControl fullWidth>
+                  <InputLabel id="registerRole-label">角色</InputLabel>
+                  <Select
+                    labelId="registerRole-label"
+                    id="registerRole"
+                    value={registerData.role}
+                    label="角色"
+                    onChange={(e) => setRegisterData({...registerData, role: e.target.value})}
+                    required
+                  >
+                    <MenuItem value="student">学生</MenuItem>
+                    <MenuItem value="teacher">教师</MenuItem>
+                    <MenuItem value="admin">系统管理员</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button type="submit" variant="contained" color="primary">
+                  注册
+                </Button>
+              </Box>
+            </Paper>
+          )}
+        </Box>
+        
+        {message.text && (
+          <Box
+            sx={{
+              p: 2,
+              backgroundColor: message.type === 'error' ? '#ffebee' : '#e8f5e9',
+              color: message.type === 'error' ? '#b71c1c' : '#2e7d32',
+              borderRadius: 1
+            }}
+          >
+            {message.text}
+          </Box>
+        )}
+      </Container>
+    </Box>
   );
 };
 

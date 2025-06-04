@@ -43,49 +43,13 @@ h1 {
     background-color: var(--primary-color);
 }
 
-/* 表单容器 */
-.form-wrapper {
-    position: relative;
-    overflow: hidden;
-    min-height: 400px; /* 防止高度变化导致跳动 */
-}
-
+/* 表单容器样式 */
 .form-container {
     background-color: var(--light-bg);
     padding: var(--spacing-md);
     border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-lg);
     text-align: left;
-    position: absolute;
-    width: calc(100% - 4 * var(--spacing-md));
-    left: var(--spacing-md);
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
-                opacity 0.4s ease;
-    top: 0;
-}
-
-.form-container.active {
-    position: relative;
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* 为切换添加方向感知动画 */
-.form-container.login-form {
-    transform: translateX(-100%);
-}
-
-.form-container.login-form.active {
-    transform: translateX(0);
-}
-
-.form-container.register-form {
-    transform: translateX(100%);
-}
-
-.form-container.register-form.active {
-    transform: translateX(0);
+    margin-bottom: var(--spacing-lg);
 }
 
 /* 表单组 */

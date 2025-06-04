@@ -1,0 +1,53 @@
+.chat-container {
+  display: flex;
+  justify-content: top;
+  align-items: center;
+  min-height: 20vh;
+  /* padding: 20px; */
+  box-sizing: border-box;
+}
+
+.chat-wrapper {
+  width: 100%;
+  max-width: 800px;
+  height: 60vh;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 图片预览区域 */
+.image-previews {
+  height: 100px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 10px 0;
+}
+
+.image-preview {
+  display: inline-block;
+  position: relative;
+  margin-right: 10px;
+}
+
+.image-preview img {
+  height: 80px;
+  width: auto;
+}
+
+.image-preview button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  border: none;
+  font-size: 16px;
+}
