@@ -43,10 +43,10 @@ def toolfunc(
         ...
     ```
     """
-    from backend.langplatform import tools
+    from backend.langplatform import tool_list
     
     # 检查工具是否已存在
-    if any(toolfunc.name == name for toolfunc in tools):
+    if any(toolfunc.name == name for toolfunc in tool_list):
         raise ValueError(f"工具 '{name}' 已经存在")
         
     if isinstance(example, str):
@@ -66,7 +66,7 @@ def toolfunc(
             tool_description=text_description,
             function=f
         )
-        tools.append(workflow_info)
+        tool_list.append(workflow_info)
 
         @wraps(f)
         def wrapper(*args, **kwargs):

@@ -75,10 +75,10 @@ def workflow(
         # 加法工作流
         ...
     """
-    from .. import tools
+    from .. import tool_list
     
     # 检查工作流是否已存在
-    if any(workflow.name == name for workflow in tools):
+    if any(workflow.name == name for workflow in tool_list):
         raise ValueError(f"工作流工具 '{name}' 已经存在")
         
     if isinstance(example, str):
@@ -98,7 +98,7 @@ def workflow(
             tool_description=text_description,
             function=f
         )
-        tools.append(workflow_info)
+        tool_list.append(workflow_info)
 
         @wraps(f)
         def wrapper(*args, **kwargs):

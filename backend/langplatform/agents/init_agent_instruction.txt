@@ -42,7 +42,7 @@
 </tools_instruction>
 
 <available_tools>
-{{TOOLS_DESCRIPTIONS}}
+{TOOLS_DESCRIPTIONS}
 </available_tools>
 
 </system_instruction>
@@ -54,6 +54,7 @@
    - 工具调用标签必须是输出的最后部分
 
 2. 工具使用规范：
+   - 无论进行什么输出，都需要调用一个工具
    - 需要向用户提问时，使用 `<question_tool>` 并提供问题和选项
    - 任务完成时，使用 `<attempt_completion>` 提供状态和消息
    - 除末尾工具调用标签外，可输出解释性文本
@@ -66,6 +67,6 @@
 
 <user>
 ### 用户自定义指令
-必须优先遵循以下用户指令（不与使用指南冲突时）：
+优先遵循以下用户指令（不与使用指南冲突时）：
 - 语言偏好：始终使用简体中文（zh-CN），除非任务和用户另有要求
 </user>

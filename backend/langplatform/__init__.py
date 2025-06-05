@@ -19,7 +19,7 @@ class ToolInfo(BaseModel):
     tool_type: Literal["workflow", "toolfunc"]
     function: Callable[[], Union[Runnable, str]]
 
-tools: List[ToolInfo] = []
+tool_list: List[ToolInfo] = []
 """
 现有工具列表
 
@@ -29,7 +29,7 @@ tools: List[ToolInfo] = []
 列表内容示例：
 
 ```python
-tools = [
+tool_list = [
     ToolInfo(
         name="addition",
         tool_type="workflow",
@@ -96,7 +96,7 @@ def call_tools(call_dict: Dict[str, Union[str, Dict[str, str]]]) -> Union[str, T
         raise ValueError("工具调用字典中缺少 'name' 字段")
     params = call_dict.get("parameters", {})
 
-    for tool in tools:
+    for tool in tool_list:
         if tool.name == name:
             if not tool.function:
                 raise ValueError(f"工具 '{name}' 没有定义函数")
