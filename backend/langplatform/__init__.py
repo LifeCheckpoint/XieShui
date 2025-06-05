@@ -1,5 +1,5 @@
 from langchain_core.runnables.base import Runnable
-from typing import List, Dict, Union, Callable, Any, Literal
+from typing import List, Dict, Union, Callable, Any, Literal, Tuple
 from ..chat_handler import send_agent_msg
 from pydantic import BaseModel
 from pathlib import Path
@@ -8,6 +8,11 @@ import importlib
 class ToolInfo(BaseModel):
     """
     工具信息模型
+
+    `name`: 工具名称
+    `tool_description`: 工具描述，包含参数和示例
+    `tool_type`: 工具类型，分为 "workflow"（工作流）和 "toolfunc"（函数）
+    `function`: 工具函数，返回一个可调用的工作流或函数
     """
     name: str
     tool_description: str
@@ -74,7 +79,7 @@ tools = [
 ```
 """
 
-def call_tools(call_dict: Dict[str, Union[str, Dict[str, str]]]) -> str:
+def call_tools(call_dict: Dict[str, Union[str, Dict[str, str]]]) -> Union[str, Tuple]:
     """
     调用指定名称的工具，迭代返回状态
 

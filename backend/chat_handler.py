@@ -77,8 +77,29 @@ def route_chat(
     """
     def generate():
         try:
-            pass
+            # 构建LangChain兼容的上下文
+            langchain_context = {
+                "history": [
+                    {
+                        "role": "user" if msg.get("position") == "right" else "assistant",
+                        "content": msg["content"]["text"] if msg["type"] == "text" else ""
+                    }
+                    for msg in history
+                ],
+                "current_input": {
+                    "text": current_text,
+                    "images": current_image_paths
+                }
+            }
+            
+            # 这里将调用主Agent处理上下文
+            # agent_response = main_agent.process(langchain_context)
+            # yield agent_response
+            
+            # 临时示例响应
+            yield send_text_msg("LangChain上下文已构建，等待主Agent实现")
         except Exception as e:
             print(f"生成SSE流时出错: {str(e)}")
+            yield send_text_msg(f"处理出错: {str(e)}")
     
     return generate()
