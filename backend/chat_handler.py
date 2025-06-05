@@ -78,19 +78,19 @@ def route_chat(
     def generate():
         try:
             # 构建LangChain兼容的上下文
-            langchain_context = {
-                "history": [
-                    {
-                        "role": "user" if msg.get("position") == "right" else "assistant",
-                        "content": msg["content"]["text"] if msg["type"] == "text" else ""
-                    }
-                    for msg in history
-                ],
-                "current_input": {
-                    "text": current_text,
-                    "images": current_image_paths
-                }
-            }
+            # langchain_context = {
+            #     "history": [
+            #         {
+            #             "role": "user" if msg.get("position") == "right" else "assistant",
+            #             "content": msg["content"]["text"] if msg["type"] == "text" else ""
+            #         }
+            #         for msg in history
+            #     ],
+            #     "current_input": {
+            #         "text": current_text,
+            #         "images": current_image_paths
+            #     }
+            # }
             
             # 这里将调用主Agent处理上下文
             # agent_response = main_agent.process(langchain_context)

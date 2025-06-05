@@ -61,7 +61,7 @@
 </output>
 
 <restrict>
-   - 仅能通过`ask_followup_question`工具提问，需提供2-5个预设选项
+   - 仅能通过`question_tool`工具提问，需提供2-5个预设选项
    - 任务完成必须通过`attempt_completion`提交，禁止结尾提问
 </restrict>
 
