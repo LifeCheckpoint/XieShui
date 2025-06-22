@@ -123,8 +123,16 @@ class Knowledge_Graph(BaseModel):
             
             del self.nodes[node_id]
                 
-                
-        
+    def remove_edge(self,edge_id:str):
+        edge = self.edges[edge_id]
+        if self.verify_edge_id(edge) != -1:
+            print('ValueError')
+            exit(0)
+        else:
+            edge.start_node.out_edge.remove(edge_id)
+            edge.end_node.in_edge.remove(edge_id)
+            del self.edges[edge_id]
+            
         
     
             
