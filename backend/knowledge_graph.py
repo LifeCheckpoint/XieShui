@@ -29,7 +29,7 @@ class Knowledge_Graph(BaseModel):
         self.node_connection = data.get('node_connection', {}) #ai写的，这三句不是很理解
 
     def add_node(self, node: Knowledge_Node):
-        if self.verify_node(self,node) != -1:
+        if self.verify_node(self,node) == -1:
             print("ValueError")
             exit(0)
         else:
@@ -37,4 +37,21 @@ class Knowledge_Graph(BaseModel):
     
     def verify_node(self,node:Knowledge_Node):
         return self.nodes.get(node.id,-1)
+    
+    def verify_edge_id(self,edge:Knowledge_Edge):
+        return self.edges.get(edge.id,-1)
+    
+    def add_edge(self,edge:Knowledge_Edge):
+        if self.verify_node(edge.start_node) == -1 or self.verify_node(edge.end_node) == -1:
+            print('ValueError')
+            exit(0)
+        elif self.verify_edge_id(edge) != -1:
+            print('ValueError')
+            exit(0)
+        else:
+            self.edges[edge.id] = edge
+            edge.start_node.out_edge.append(edge.id)
+            edge.end_node.in_edge.append(edge.id)
+            
         
+            
