@@ -7,19 +7,20 @@ class Knowledge_Node(BaseModel):
     name: str
     description: Optional[str] = None
     content: Optional[Any] = None
+    in_edge:List[str] = []
+    out_edge:List[str] = []
 
 
 class Knowledge_Edge(BaseModel):
     id: str
-    start_node: str
-    end_node: str
+    start_node: Knowledge_Node
+    end_node: Knowledge_Node
     description: Optional[str]
 
 
 class Knowledge_Graph(BaseModel):
     nodes: Dict[str, Knowledge_Node] = {}
     edges: Dict[str, Knowledge_Edge] = {}
-    node_connection: Dict[str, Dict[str, List[str]]] = {}
 
     def __init__(self, **data):
         super().__init__(**data)
