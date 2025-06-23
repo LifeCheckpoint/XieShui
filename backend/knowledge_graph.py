@@ -29,29 +29,21 @@ class Knowledge_Graph(BaseModel):
         self.node_connection = data.get('node_connection', {}) #ai写的，这三句不是很理解
 
     def add_node(self, node: Knowledge_Node):
-        if self.verify_node(self,node) == -1:
-            print("ValueError")
-            exit(0)
-        else:
-            self.nodes[node.id] = node
-    
-    def verify_node(self,node:Knowledge_Node):
-        return self.nodes.get(node.id,-1)
-    
-    def verify_edge_id(self,edge:Knowledge_Edge):
-        return self.edges.get(edge.id,-1)
+        if node.id in self.nodes:
+            raise ValueError(f'节点ID{node.id}已存在')
+        self.nodes[node.id] = node
     
     def add_edge(self,edge:Knowledge_Edge):
-        if self.verify_node(edge.start_node) == -1 or self.verify_node(edge.end_node) == -1:
-            print('ValueError')
-            exit(0)
-        elif self.verify_edge_id(edge) != -1:
-            print('ValueError')
-            exit(0)
-        else:
-            self.edges[edge.id] = edge
-            edge.start_node.out_edge.append(edge.id)
-            edge.end_node.in_edge.append(edge.id)
+        if edge.start_node.id not in self.nodes:
+            raise ValueError(f'节点ID{edge.start_node.id}不存在')
+        elif edge.end_node.id not in self.nodes:
+            raise ValueError(f'节点ID{edge.end_node.id}不存在')
+        if edge.id in self.edges:
+            raise ValueError(f'节点ID{edge.id}已存在')
+        
+        self.edges[edge.id] = edge
+        edge.start_node.out_edge.append(edge.id)
+        edge.end_node.in_edge.append(edge.id)
     
     def get_node(self,node_id:str):
         return self.nodes.get(node_id)
@@ -69,70 +61,60 @@ class Knowledge_Graph(BaseModel):
     
     def get_out_node(self,node_id:str):
         node = self.nodes[node_id]
-        if self.verify_node(node) == -1:
-            print('Valueerror')
-            exit(0)
-        else:
-            out_edge_list = [self.nodes[id] for id in node.out_edge]
-            return out_edge_list
+        if node.id not in self.nodes:
+            raise ValueError(f'节点ID{node.id}不存在')
+        out_edge_list = [self.nodes[id] for id in node.out_edge]
+        return out_edge_list
     
     def get_in_node(self,node_id:str):
         node = self.nodes[node_id]
-        if self.verify_node(self,node) == -1:
-            print("ValueError")
-            exit(0)
-        else:
-            in_edge_list = [self.nodes[id] for id in node.in_edge]
-            return in_edge_list
+        if node.id not in self.nodes:
+            raise ValueError(f'节点ID{node.id}不存在')
+        in_edge_list = [self.nodes[id] for id in node.in_edge]
+        return in_edge_list
     
     def get_neighbours(self,node_id:str):
         node = self.nodes[node_id]
-        if self.verify_node(self,node) == -1:
-            print("ValueError")
-            exit(0)
-        else:
-            node_list = []
-            for edge_id in node.in_edge:
-                edge = self.edges[edge_id]
-                node_list.append(edge.start_node)
-                node_list.append(edge.end_node)
-            for edge_id in node.out_edge:
-                edge = self.edges[edge.id]
-                node_list.append(edge.start_node)
-                node_list.append(edge.end_node)
-            
-            node_list = list(set(node_list))
-            node_list.remove(node)
-            return node_list
+        if node.id not in self.nodes:
+            raise ValueError(f'节点ID{node.id}不存在')
+        node_list = []
+        for edge_id in node.in_edge:
+            edge = self.edges[edge_id]
+            node_list.append(edge.start_node)
+            node_list.append(edge.end_node)
+        for edge_id in node.out_edge:
+            edge = self.edges[edge.id]
+            node_list.append(edge.start_node)
+            node_list.append(edge.end_node)
+        
+        node_list = list(set(node_list))
+        node_list.remove(node)
+        return node_list
         
     def remove_node(self,node_id:str):
         node = self.nodes[node_id]
-        if self.verify_node(self,node) == -1:
-            print("ValueError")
-            exit(0)
-        else:
-            for edge_id in node.in_edge:
-                edge = self.edges[edge_id]
-                edge.start_node.out_edge.remove(edge_id)
-                del self.edges[edge_id]
-            
-            for egde_id in node.out_edge:
-                edge = self.edges[edge_id]
-                edge.end_node.in_edge.remove(edge_id)
-                del self.edges[edge_id]
-            
-            del self.nodes[node_id]
-                
-    def remove_edge(self,edge_id:str):
-        edge = self.edges[edge_id]
-        if self.verify_edge_id(edge) != -1:
-            print('ValueError')
-            exit(0)
-        else:
+        if node.id not in self.nodes:
+            raise ValueError(f'节点ID{node.id}不存在')
+        for edge_id in node.in_edge:
+            edge = self.edges[edge_id]
             edge.start_node.out_edge.remove(edge_id)
+            del self.edges[edge_id]
+        
+        for egde_id in node.out_edge:
+            edge = self.edges[edge_id]
             edge.end_node.in_edge.remove(edge_id)
             del self.edges[edge_id]
+        
+        del self.nodes[node_id]
             
+    def remove_edge(self,edge_id:str):
+        edge = self.edges[edge_id]
+        if edge.id not in self.edges:
+            raise ValueError(f'节点ID{edge.id}不存在')
+        edge.start_node.out_edge.remove(edge_id)
+        edge.end_node.in_edge.remove(edge_id)
+        del self.edges[edge_id]
+        
         
     
             
