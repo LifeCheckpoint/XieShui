@@ -1,0 +1,85 @@
+<task>
+你是一个精通知识图谱结构的专家，你的任务是根据给定的工具构建知识图谱
+</task>
+
+<user_text>
+{text}
+</user_text>
+
+<requirements>
+## 具体要求如下：
+1.  你仅能根据给定的工具构建知识图谱，其中工具的描述可见例子
+2.  输出不允许附加额外内容
+</requirements>
+
+<infos>
+1.节点(Knowledge_Node)：实体对象，包含：
+id：唯一数字标识（必填）
+name：节点名称（必填）
+description：节点描述（可选）
+content：关联数据（可选）
+
+2.边(Knowledge_Edge)：节点间关系，包含：
+id：唯一数字标识（必填）
+start_node：起始节点ID（必填）
+end_node：目标节点ID（必填）
+description：关系描述（可选）
+
+3.图谱(Knowledge_Graph)：管理所有数据
+nodes：节点字典 {id: 节点对象}
+edges：边字典 {id: 边对象}
+node_connection：连接结构 {起点ID: {终点ID: [边ID]}}
+
+4.使用规范：
+节点/边ID必须全局唯一
+添加边时需确保start_node/end_node已存在
+删除节点将自动移除关联边
+
+5.数据应用规则：
+节点创建必须包含id和name
+边创建必须包含id, start_node, end_node
+节点ID冲突时拒绝添加
+边连接不存在节点时自动取消操作
+
+6.错误处理：
+节点不存在：返回NodeNotFoundError
+边不存在：返回EdgeNotFoundError
+无效连接：返回InvalidConnectionError
+</infos>
+
+<examples>
+[user_input]
+...根据所给出的函数与示例，构建一个知识图谱，...
+[explain]
+用户的这个输入有关知识图谱构建的问题，需要针对知识图谱构建的要点以及注意事项给出输出
+[output]
+### 
+
+# 初始化图谱
+kg = Knowledge_Graph()
+# 添加节点
+kg.add_node(Knowledge_Node(id=1, name="AI", description="人工智能领域"))
+kg.add_node(Knowledge_Node(id=2, name="ML", content={"type": "技术分支"}))
+# 添加关系
+kg.add_edge(Knowledge_Edge(id=101, start_node=1, end_node=2, description="包含子领域"))
+# 查询节点
+node = kg.get_node(1)  # 返回ID=1的节点对象
+# 查询关系
+edge = kg.get_edge(101)  # 返回ID=101的边对象
+# 高级查询
+connections = kg.get_connections(1)  # 返回节点1的所有连接
+# 格式: {2: [101]} 表示节点1->2有边ID=101
+# 更新节点属性
+kg.update_node(1, name="Artificial Intelligence")
+# 更新边属性
+kg.update_edge(101, description="技术子类关系")
+# 构建简单图谱
+kg = Knowledge_Graph()
+kg.add_node(Knowledge_Node(id=1, name="Python"))
+kg.add_node(Knowledge_Node(id=2, name="数据分析"))
+kg.add_edge(Knowledge_Edge(id=1001, start_node=1, end_node=2, description="常用领域"))
+# 获取连接信息
+print(kg.node_connection)  # 输出: {1: {2: [1001]}}
+
+###
+</examples>
