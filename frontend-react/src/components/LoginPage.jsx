@@ -11,9 +11,10 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
+import useWebSocket from '../hooks/useWebSocket'; // 导入 useWebSocket Hook
 
 const LoginPage = () => {
   const [activeTab, setActiveTab] = useState('login');
@@ -22,55 +23,56 @@ const LoginPage = () => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const navigate = useNavigate();
 
+  const { sendMessage, lastMessage } = useWebSocket('http://localhost:7222'); // 使用 WebSocket Hook
+
+  useEffect(() => {
+    if (lastMessage) {
+      if (lastMessage.type === 'auth_response') {
+        const data = lastMessage.payload;
+        if (data.status === 'success') {
+          setMessage({ text: `登录成功！欢迎 ${data.username} (${data.role})`, type: 'success' });
+          localStorage.setItem('user', JSON.stringify({ id: data.user_id, username: data.username, role: data.role }));
+          setTimeout(() => navigate('/welcome'), 1500);
+        } else {
+          setMessage({ text: `认证失败: ${data.message}`, type: 'error' });
+        }
+      } else if (lastMessage.type === 'error') {
+        setMessage({ text: `服务器错误: ${lastMessage.payload.message}`, type: 'error' });
+      }
+    }
+  }, [lastMessage, navigate]);
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:7222/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginData)
-      });
-      
-      const data = await response.json();
-      
-      if (data.status === 'success') {
-        setMessage({ text: `登录成功！欢迎 ${data.user.username} (${data.user.role})`, type: 'success' });
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setTimeout(() => navigate('/welcome'), 1500);
-      } else {
-        setMessage({ text: `登录失败: ${data.message}`, type: 'error' });
-      }
-    } catch (error) {
-      setMessage({ text: `网络错误: ${error.message}`, type: 'error' });
-    }
+    setMessage({ text: '', type: '' }); // 清除之前的消息
+    sendMessage({
+      type: 'auth_request',
+      payload: {
+        action: 'login',
+        identifier: loginData.identifier,
+        password: loginData.password,
+      },
+    });
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+    setMessage({ text: '', type: '' }); // 清除之前的消息
     if (registerData.role === 'admin' && !registerData.password) {
       setMessage({ text: '管理员必须设置密码', type: 'error' });
       return;
     }
     
-    try {
-      const response = await fetch('http://localhost:7222/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registerData)
-      });
-      
-      const data = await response.json();
-      
-      if (response.status === 201) {
-        setMessage({ text: '注册成功！请使用新账号登录', type: 'success' });
-        setRegisterData({ id: '', username: '', password: '', role: 'student' });
-        setActiveTab('login');
-      } else {
-        setMessage({ text: `注册失败: ${data.message}`, type: 'error' });
-      }
-    } catch (error) {
-      setMessage({ text: `网络错误: ${error.message}`, type: 'error' });
-    }
+    sendMessage({
+      type: 'auth_request',
+      payload: {
+        action: 'register',
+        id: registerData.id,
+        username: registerData.username,
+        password: registerData.password,
+        role: registerData.role,
+      },
+    });
   };
 
   return (
