@@ -29,19 +29,34 @@ class ChatMessage(BaseModel):
     role: str
     content: Dict[str, Any]
 
+class QuestionRequestPayload(BaseModel):
+    question: str
+    options: List[str]
+    tool_call_id: Optional[str] = None # 用于关联到 LangGraph 的 interrupt
+
+class AgentStatusContent(BaseModel):
+    status: str # 例如 "thinking", "tool_calling", "waiting_for_human_input", "finished"
+    message: str # 详细描述
+    current_node: Optional[str] = None
+    tool_name: Optional[str] = None
+
 class ChatRequestPayload(BaseModel):
     history: List[ChatMessage]
     current_text: str
     current_image_paths: List[str]
+    thread_id: Optional[str] = "default_thread" # 新增
+    resume_data: Optional[Dict[str, Any]] = None # 新增
 
 class ChatResponseContent(BaseModel):
     data: Optional[str] = None
-    status: Optional[str] = None
-    message: Optional[str] = None
-    reason: Optional[str] = None
+    status: Optional[str] = None # For agent_status
+    message: Optional[str] = None # For agent_status
+    reason: Optional[str] = None # For stop
+    question_payload: Optional[QuestionRequestPayload] = None # For question_request
+    agent_status_content: Optional[AgentStatusContent] = None # For agent_status
 
 class ChatResponsePayload(BaseModel):
-    type: str # "text", "agent_status", "stop"
+    type: str # "text", "agent_status", "stop", "question_request"
     content: ChatResponseContent
 
 class ImageUploadRequestPayload(BaseModel):

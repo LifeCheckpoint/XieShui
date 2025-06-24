@@ -1,6 +1,5 @@
 from langchain_core.runnables.base import Runnable
 from typing import List, Dict, Union, Callable, Any, Literal, Tuple
-from ..chat_handler import send_agent_msg
 from pydantic import BaseModel
 from pathlib import Path
 import importlib
@@ -115,6 +114,7 @@ def call_tools(call_dict: Dict[str, Union[str, Dict[str, str]]]) -> Union[str, T
     raise ValueError(f"未找到名为 '{name}' 的工具")
 
 def set_agent_status(status: str, message: str) -> Callable[[Any], Any]:
+    from chat_handler import send_agent_msg
     """
     生成 Agent 状态消息，注意这里返回的是提供给 RunnableLambda 的函数
 

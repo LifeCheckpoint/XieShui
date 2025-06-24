@@ -6,7 +6,7 @@ from pathlib import Path
 from langchain_community.chat_models import ChatOpenAI
 
 api_key_path = Path(__file__).parent / "api_key.json"
-api_keys = json.load(api_key_path.read_text(encoding="utf-8"))
+api_keys = json.loads(api_key_path.read_text(encoding="utf-8"))
 
 class ModelDeepSeekV3(ChatOpenAI):
     """
