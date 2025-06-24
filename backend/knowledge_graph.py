@@ -6,6 +6,7 @@ from collections import deque
 class Knowledge_Node(BaseModel):
     id: str
     name: str
+    title:str
     description: Optional[str] = None  # optional的意思是可以没有，有的话变量类型就是str
     content: Optional[Any] = None
     in_edge: List[str] = []
@@ -16,6 +17,7 @@ class Knowledge_Node(BaseModel):
 
 class Knowledge_Edge(BaseModel):
     id: str
+    title:str
     start_node: Knowledge_Node
     end_node: Knowledge_Node
     description: Optional[str]
