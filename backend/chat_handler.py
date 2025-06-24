@@ -1,5 +1,5 @@
-import json
-from typing import List
+from typing import List, Dict, Any
+from models import ChatResponsePayload, ChatResponseContent, ChatRequestPayload, ChatMessage
 
 using_debug = False
 
@@ -18,88 +18,67 @@ def debug_output(func):
     return wrapper
 
 @debug_output
-def send_agent_msg(status: str, message: str):
+def send_agent_msg(status: str, message: str) -> ChatResponsePayload:
     """
     生成 Agent 状态消息
-
-    使用方式：
-    ```python
-    yield set_agent_status("Agent 状态", "附加信息")
-    ```
     """
-    event = {
-        "type": "agent_status",
-        "content": {"status": status, "message": message}
-    }
-    return "data: " + json.dumps(event) + "\n\n"
+    return ChatResponsePayload(
+        type="agent_status",
+        content=ChatResponseContent(status=status, message=message)
+    )
 
 @debug_output
-def send_text_msg(text: str):
+def send_text_msg(text: str) -> ChatResponsePayload:
     """
     生成文本消息
-
-    使用方式：
-    ```python
-    yield set_text("文本内容")
-    ```
     """
-    event = {
-        "type": "text",
-        "content": {"data": text}
-    }
-    return "data: " + json.dumps(event) + "\n\n"
+    return ChatResponsePayload(
+        type="text",
+        content=ChatResponseContent(data=text)
+    )
 
 @debug_output
-def send_stop_msg(reason: str = "normal"):
+def send_stop_msg(reason: str = "normal") -> ChatResponsePayload:
     """
     生成停止消息
-
-    使用方式：
-    ```python
-    yield set_stop("中止原因")
-    ```
     """
-    event = {
-        "type": "stop",
-        "content": {"reason": reason}
-    }
-    return "data: " + json.dumps(event) + "\n\n"
+    return ChatResponsePayload(
+        type="stop",
+        content=ChatResponseContent(reason=reason)
+    )
 
 def route_chat(
-        history: List,
+        history: List[ChatMessage],
         current_text: str,
-        current_image_paths: List
-    ):
+        current_image_paths: List[str]
+    ) -> List[ChatResponsePayload]:
     """
     ## 路由聊天内容
 
     所有聊天内容都会被发送到这里进行处理。
     """
-    def generate():
-        try:
-            # 构建LangChain兼容的上下文
-            # langchain_context = {
-            #     "history": [
-            #         {
-            #             "role": "user" if msg.get("position") == "right" else "assistant",
-            #             "content": msg["content"]["text"] if msg["type"] == "text" else ""
-            #         }
-            #         for msg in history
-            #     ],
-            #     "current_input": {
-            #         "text": current_text,
-            #         "images": current_image_paths
-            #     }
-            # }
-            
-            # 这里将调用主Agent处理上下文
-            # agent_response = main_agent.process(langchain_context)
-            # yield agent_response
-            
-            # 临时示例响应
-            yield send_text_msg("LangChain上下文已构建，等待主Agent实现")
-        except Exception as e:
-            print(f"生成SSE流时出错: {str(e)}")
-            yield send_text_msg(f"处理出错: {str(e)}")
-    
-    return generate()
+    try:
+        # 构建LangChain兼容的上下文
+        # langchain_context = {
+        #     "history": [
+        #         {
+        #             "role": msg.role,
+        #             "content": msg.content.get("text", "")
+        #         }
+        #         for msg in history
+        #     ],
+        #     "current_input": {
+        #         "text": current_text,
+        #         "images": current_image_paths
+        #     }
+        # }
+        
+        # 这里将调用主Agent处理上下文
+        # agent_response = main_agent.process(langchain_context)
+        # yield agent_response
+        
+        # 临时示例响应
+        yield send_text_msg("LangChain上下文已构建，等待主Agent实现")
+    except Exception as e:
+        print(f"处理聊天请求时出错: {str(e)}")
+        yield send_text_msg(f"处理出错: {str(e)}")
