@@ -16,7 +16,7 @@ class ToolInfo(BaseModel):
     name: str
     tool_description: str
     tool_type: Literal["workflow", "toolfunc"]
-    function: Callable[[], Union[Runnable, str]]
+    function: Callable[..., Any] # 修改为可接受任意参数的可调用对象
 
 tool_list: List[ToolInfo] = []
 """
@@ -107,7 +107,7 @@ def call_tools(call_dict: Dict[str, Union[str, Dict[str, str]]]) -> Union[str, T
 
             elif tool.tool_type == "toolfunc":
                 # 如果是函数类型，直接调用
-                result = tool.function(**params)
+                result = tool.function(**(params if isinstance(params, dict) else {})) # 确保 params 是字典
             
             return result
     
