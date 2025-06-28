@@ -35,7 +35,7 @@ async def route_chat(
         if main_agent_instance is None:
             await initialize_main_agent()
         
-        for response_payload in main_agent_instance.process_chat_request(history, current_text, current_image_paths, thread_id, resume_data):
+        for response_payload in main_agent_instance.process_chat_request(history, current_text, current_image_paths, thread_id, resume_data): # type: ignore
             yield response_payload
         
     except Exception as e:
