@@ -1,21 +1,22 @@
-from pydantic import BaseModel,Field
+from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from collections import deque
 import uuid
 
+
 class Knowledge_Node(BaseModel):
-    id:str = Field(default_factory=lambda:str(uuid.uuid4())[:8])
+    id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str
-    title:str = None
+    title: str = None
     description: Optional[str] = None  # optional的意思是可以没有，有的话变量类型就是str
     content: Optional[Any] = None
     in_edge: List[str] = []
     out_edge: List[str] = []
-    
+
 
 class Knowledge_Edge(BaseModel):
-    id:str = Field(default_factory=lambda:str(uuid.uuid4())[:8])
-    title:str = None
+    id: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])
+    title: str = None
     start_node: Knowledge_Node
     end_node: Knowledge_Node
     description: Optional[str]
@@ -28,7 +29,7 @@ class Knowledge_Graph(BaseModel):
     def add_node(self, node: Knowledge_Node):
         if node.id in self.nodes:
             raise ValueError(f"节点ID{node.id}已存在")
-        self.nodes[node.id] = node 
+        self.nodes[node.id] = node
 
     def add_edge(self, edge: Knowledge_Edge):
         if edge.start_node.id not in self.nodes:
@@ -40,7 +41,7 @@ class Knowledge_Graph(BaseModel):
 
         self.edges[edge.id] = edge
         edge.start_node.out_edge.append(edge.id)
-        edge.end_node.in_edge.append(edge.id)  
+        edge.end_node.in_edge.append(edge.id)
 
     def get_node(self, node_id: str):
         return self.nodes.get(node_id)
@@ -89,7 +90,6 @@ class Knowledge_Graph(BaseModel):
         new_node_list = [self.nodes[node_id] for node_id in node_list]
         return new_node_list
 
-
     def remove_node(self, node_id: str):
         node = self.nodes[node_id]
         if node.id not in self.nodes:
@@ -115,7 +115,7 @@ class Knowledge_Graph(BaseModel):
         del self.edges[edge_id]
 
     def create_graph(self):
-        graph:Dict[str,List] = {}
+        graph: Dict[str, List] = {}
         for node_id in self.nodes:
             edge_list = self.nodes[node_id].out_edge
             node_list = []
@@ -125,17 +125,15 @@ class Knowledge_Graph(BaseModel):
             graph[node_id] = node_list
         return graph
 
-
-
     def bfs_directed_path(graph, start, goal):
         """
         在有向图中使用BFS查找从start到goal的路径
-        
+
         参数:
         graph: 字典表示的有向图结构，键是节点，值是该节点指向的邻居列表
         start: 起始节点
         goal: 目标节点
-        
+
         返回:
         从start到goal的路径列表，如果不存在路径则返回None
         """
@@ -143,10 +141,10 @@ class Knowledge_Graph(BaseModel):
         parent = {start: None}
         visited = set([start])
         queue = deque([start])
-        
+
         while queue:
             current = queue.popleft()
-            
+
             # 如果找到目标节点，回溯构建路径
             if current == goal:
                 path = []
@@ -154,33 +152,43 @@ class Knowledge_Graph(BaseModel):
                     path.append(current)
                     current = parent[current]
                 return path[::-1]  # 反转路径，从start到goal
-            
+
             # 遍历当前节点指向的所有邻居
             for neighbor in graph.get(current, []):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     parent[neighbor] = current
                     queue.append(neighbor)
-        
+
         return None  # 没有找到路径
 
-    def find_path(self,start_node_id,goal_node_id):
+    def find_path(self, start_node_id, goal_node_id):
         if start_node_id not in self.nodes:
             raise ValueError(f"节点ID{start_node_id}不存在")
         elif goal_node_id not in self.nodes:
             raise ValueError(f"节点ID{goal_node_id}不存在")
-        
-        graph = self.create_graph
-        self.bfs_directed_path(graph,start_node_id,goal_node_id)
-        
-    
-user_1 = Knowledge_Node(name = 'dht',content = 'a student of hit')
-user_2 = Knowledge_Node(name = 'ldd',content='a student of sustech')
-user_3 = Knowledge_Node(name='yy',description='he like reading books')
 
-edge_1 = Knowledge_Edge(start_node=user_1,end_node=user_2,description='dht think ldd like loli')
-edge_2 = Knowledge_Edge(start_node=user_2,end_node=user_3,description='ldd think yy uses phone too much time')
-edge_3 = Knowledge_Edge(start_node=user_3,end_node=user_1,description='yy and dht both played Honkai Star Rail')
+        graph = self.create_graph
+        self.bfs_directed_path(graph, start_node_id, goal_node_id)
+
+
+user_1 = Knowledge_Node(name="dht", content="a student of hit")
+user_2 = Knowledge_Node(name="ldd", content="a student of sustech")
+user_3 = Knowledge_Node(name="yy", description="he like reading books")
+
+edge_1 = Knowledge_Edge(
+    start_node=user_1, end_node=user_2, description="dht think ldd like loli"
+)
+edge_2 = Knowledge_Edge(
+    start_node=user_2,
+    end_node=user_3,
+    description="ldd think yy uses phone too much time",
+)
+edge_3 = Knowledge_Edge(
+    start_node=user_3,
+    end_node=user_1,
+    description="yy and dht both played Honkai Star Rail",
+)
 
 
 graph = Knowledge_Graph()
