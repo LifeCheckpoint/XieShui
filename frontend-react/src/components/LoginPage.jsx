@@ -11,7 +11,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 import useWebSocket from '../hooks/useWebSocket'; // 导入 useWebSocket Hook
@@ -23,7 +23,16 @@ const LoginPage = () => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const navigate = useNavigate();
 
-  const { sendMessage, lastMessage } = useWebSocket('http://localhost:7222'); // 使用 WebSocket Hook
+  const [pendingAuth, setPendingAuth] = useState(null); // 用于存储待发送的认证请求
+
+  const handleConnected = useCallback(() => {
+    if (pendingAuth) {
+      sendMessage(pendingAuth);
+      setPendingAuth(null); // 发送后清除待处理请求
+    }
+  }, [pendingAuth]);
+
+  const { sendMessage, lastMessage } = useWebSocket('ws://localhost:7223', handleConnected); // 使用 WebSocket Hook，并传入回调
 
   useEffect(() => {
     if (lastMessage) {
@@ -45,14 +54,16 @@ const LoginPage = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' }); // 清除之前的消息
-    sendMessage({
+    const authRequest = {
       type: 'auth_request',
       payload: {
         action: 'login',
         identifier: loginData.identifier,
         password: loginData.password,
       },
-    });
+    };
+    setPendingAuth(authRequest); // 设置待处理请求
+    sendMessage(authRequest); // 尝试立即发送，如果未连接则会在 handleConnected 中发送
   };
 
   const handleRegisterSubmit = async (e) => {
@@ -63,7 +74,7 @@ const LoginPage = () => {
       return;
     }
     
-    sendMessage({
+    const authRequest = {
       type: 'auth_request',
       payload: {
         action: 'register',
@@ -72,7 +83,9 @@ const LoginPage = () => {
         password: registerData.password,
         role: registerData.role,
       },
-    });
+    };
+    setPendingAuth(authRequest); // 设置待处理请求
+    sendMessage(authRequest); // 尝试立即发送，如果未连接则会在 handleConnected 中发送
   };
 
   return (

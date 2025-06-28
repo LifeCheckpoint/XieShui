@@ -1,47 +1,50 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import io from 'socket.io-client';
 
-const useWebSocket = (url) => {
+const useWebSocket = (url, onConnected) => {
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState(null);
-  const socketRef = useRef(null);
+  const wsRef = useRef(null); // 将 socketRef 改名为 wsRef
 
   useEffect(() => {
-    socketRef.current = io(url, {
-      transports: ['websocket'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    wsRef.current = new WebSocket(url); // 使用原生 WebSocket
 
-    socketRef.current.on('connect', () => {
+    wsRef.current.onopen = () => {
       setIsConnected(true);
       console.log('WebSocket connected');
-    });
-
-    socketRef.current.on('disconnect', () => {
-      setIsConnected(false);
-      console.log('WebSocket disconnected');
-    });
-
-    socketRef.current.on('message', (data) => {
-      console.log('WebSocket message received:', data);
-      setLastMessage(data);
-    });
-
-    socketRef.current.on('connect_error', (err) => {
-      console.error('WebSocket connection error:', err);
-    });
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
+      if (onConnected && typeof onConnected === 'function') {
+        onConnected();
       }
     };
-  }, [url]);
+
+    wsRef.current.onclose = () => {
+      setIsConnected(false);
+      console.log('WebSocket disconnected');
+    };
+
+    wsRef.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('WebSocket message received:', data);
+        setLastMessage(data);
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error, event.data);
+      }
+    };
+
+    wsRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, [url, onConnected]); // 添加 onConnected 到依赖数组
 
   const sendMessage = useCallback((message) => {
-    if (socketRef.current && isConnected) {
-      socketRef.current.emit('message', message);
+    if (wsRef.current && isConnected) {
+      wsRef.current.send(JSON.stringify(message)); // 使用 ws.send 发送 JSON 字符串
       console.log('WebSocket message sent:', message);
     } else {
       console.warn('WebSocket not connected, message not sent:', message);

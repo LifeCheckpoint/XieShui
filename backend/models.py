@@ -14,8 +14,10 @@ class User(db.Model):
 # Pydantic Models for WebSocket Communication
 class AuthRequestPayload(BaseModel):
     action: str # "register" or "login"
-    username: str
+    identifier: str # 用于登录，可以是 username 或 user_id
+    username: Optional[str] = None # 用于注册
     password: str
+    role: Optional[str] = "student" # 新增，默认为 "student"
 
 class AuthResponsePayload(BaseModel):
     status: str # "success" or "error"

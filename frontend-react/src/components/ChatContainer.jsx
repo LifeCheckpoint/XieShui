@@ -154,6 +154,31 @@ export default function() {
     }
   }
 
+  // 处理图片发送
+  async function handleImageSend(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Image = e.target.result.split(',')[1]; // 获取 Base64 编码的图片数据
+      const filename = file.name;
+
+      // 将图片添加到预览
+      setImageFiles(prev => [...prev, file]);
+      setImageUrls(prev => [...prev, URL.createObjectURL(file)]);
+
+      // 发送图片上传请求
+      sendMessage({
+        type: 'image_upload_request',
+        payload: {
+          filename: filename,
+          image_data: base64Image,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
   // 处理问题选项点击
   function handleQuestionOptionClick(option) {
     if (waitingForQuestionAnswer && questionPayload) {
