@@ -190,13 +190,13 @@ edge_3 = Knowledge_Edge(
     description="yy and dht both played Honkai Star Rail",
 )
 
-
-graph = Knowledge_Graph()
-graph.add_node(user_1)
-graph.add_node(user_2)
-graph.add_node(user_3)
-graph.add_edge(edge_1)
-graph.add_edge(edge_2)
-graph.add_edge(edge_3)
-graph.remove_node(user_1.id)
-graph.get_neighbours(user_1.id)
+if __name__ == '__main__':
+    graph = Knowledge_Graph()
+    graph.add_node(user_1)
+    graph.add_node(user_2)
+    graph.add_node(user_3)
+    graph.add_edge(edge_1)
+    graph.add_edge(edge_2)
+    graph.add_edge(edge_3)
+    graph.remove_node(user_1.id)
+    graph.get_neighbours(user_1.id)
