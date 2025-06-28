@@ -1,4 +1,7 @@
 from typing import Annotated, TypedDict, List, Any, Union, Dict, Optional, Generator
+import logging # Add this line
+
+logger = logging.getLogger(__name__) # Add this line
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
@@ -64,13 +67,23 @@ class MainAgentGraph:
         self.graph = graph_builder.compile(checkpointer=MemorySaver())
 
     def agent_node(self, state: AgentState): # 修改为实例方法
-        llm = ModelDeepSeekR1().bind_tools(self.langchain_tools) # 使用转换后的工具列表
-        response = llm.invoke(state["messages"])
-        return {"messages": [response]}
+        try:
+            llm = ModelDeepSeekR1().bind_tools(self.langchain_tools) # 使用转换后的工具列表
+            response = llm.invoke(state["messages"])
+            logger.info(f"Agent node response: {response}") # Add log
+            return {"messages": [response]}
+        except Exception as e:
+            logger.error(f"Error in agent_node: {e}", exc_info=True) # Add log
+            raise # Re-raise the exception to be caught by route_chat
 
     def custom_tool_node(self, state: AgentState): # 修改为实例方法
-        tool_output = ToolNode(self.langchain_tools).invoke(state) # 使用转换后的工具列表
-        return tool_output
+        try:
+            tool_output = ToolNode(self.langchain_tools).invoke(state) # 使用转换后的工具列表
+            logger.info(f"Tool node output: {tool_output}") # Add log
+            return tool_output
+        except Exception as e:
+            logger.error(f"Error in custom_tool_node: {e}", exc_info=True) # Add log
+            raise # Re-raise the exception to be caught by route_chat
 
     def process_chat_request(self, history: List[ChatMessage], current_text: str, current_image_paths: List[str], thread_id: str = "default_thread", resume_data: Optional[Dict[str, Any]] = None) -> Generator[ChatResponsePayload, None, None]:
         config = RunnableConfig(configurable={"thread_id": thread_id}) # 显式构造 RunnableConfig
@@ -95,8 +108,10 @@ class MainAgentGraph:
         else:
             stream_input = {"messages": langchain_messages}
 
+        logger.info(f"Starting LangGraph stream with input: {stream_input}") # Add log
         # 迭代 LangGraph 的 stream 输出
         for s in self.graph.stream(stream_input, config=config):
+            logger.info(f"LangGraph stream step output: {s}") # Add log
             # 检查是否有中断发生 (例如 question_tool)
             if "__end__" in s and isinstance(s["__end__"], Interrupt):
                 interrupt_data = s["__end__"].data
