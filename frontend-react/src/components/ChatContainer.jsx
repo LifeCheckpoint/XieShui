@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'; // 用于生成 thread_id
 const initialMessages = [
   {
     type: 'text',
-    content: { text: '你好，我是 XieShui 智能教学辅助 Agent~' },
+    content: { text: '你好，我是 XieShui 智能教学辅助 Agent' },
     user: {
       avatar: 'avatar.png',
     },
@@ -21,19 +21,13 @@ const defaultQuickReplies = [
   {
     icon: 'message',
     name: '提示词库',
-    isNew: false,
+    isNew: true,
     isHighlight: true,
-  },
-  {
-    icon: 'message',
-    name: '学科总结',
-    isNew: false,
-    isHighlight: false,
   },
 ];
 
 export default function() {
-  const { messages, appendMsg, resetList } = useMessages(initialMessages);
+  const { messages, appendMsg, updateMsg } = useMessages(initialMessages);
   const [imageFiles, setImageFiles] = React.useState([]);
   const [imageUrls, setImageUrls] = React.useState([]);
   const [isStreaming, setIsStreaming] = React.useState(false);
@@ -115,8 +109,8 @@ export default function() {
 
   // 发送回调
   async function handleSend(type, val) {
-    if (type === 'text' && val.trim() && !isProcessing) {
-      setIsProcessing(true);
+    if (type === 'text' && val.trim() && !isStreaming) {
+      setIsStreaming(true);
       
       // 添加用户消息
       const userMsg = {
@@ -221,19 +215,9 @@ export default function() {
 
   return (
     <div className="chat-container">
-      <div className="chat-header">
-        <h2>XieShui Agent</h2>
-        <button
-          className="clear-chat-btn"
-          onClick={handleClearChat}
-          disabled={isProcessing}
-        >
-          清空聊天
-        </button>
-      </div>
       <div className="chat-wrapper">
         <Chat
-          navbar={{ title: '' }}
+          navbar={{ title: 'XieShui Agent' }}
           messages={messages}
           renderMessageContent={renderMessageContent}
           quickReplies={

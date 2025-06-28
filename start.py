@@ -28,24 +28,6 @@ if __name__ == "__main__":
     processes = []
     threads = []
 
-    # 启动后端服务
-    print("--- 启动 后端 ---")
-    backend_process = subprocess.Popen(
-        ["uv", "run", "python", "backend/app.py"],
-        cwd=os.getcwd(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
-        universal_newlines=True,
-        shell=False,
-        encoding='utf-8'
-    )
-    processes.append(backend_process)
-    backend_thread = threading.Thread(target=stream_output, args=("后端", backend_process))
-    threads.append(backend_thread)
-    backend_thread.start()
-
     # 启动 WebSocket 服务
     print("--- 启动 WebSocket ---")
     websocket_process = subprocess.Popen(
