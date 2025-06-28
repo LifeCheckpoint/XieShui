@@ -1,0 +1,28 @@
+name: Test core
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' # 可以根据项目实际使用的Python版本进行调整
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install uv
+        uv sync
+    - name: Test with pytest
+      run: |
+        pytest backend/tests/test_knowledge_graph.py
