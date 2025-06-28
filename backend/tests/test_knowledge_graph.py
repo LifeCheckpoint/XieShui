@@ -1,6 +1,5 @@
 import pytest
-from backend.knowledge_graph import Knowledge_Node, Knowledge_Edge, Knowledge_Graph
-import uuid
+from knowledge_graph import Knowledge_Node, Knowledge_Edge, Knowledge_Graph
 
 # Test Knowledge_Node creation
 def test_knowledge_node_creation():

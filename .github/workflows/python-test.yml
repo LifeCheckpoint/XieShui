@@ -25,4 +25,4 @@ jobs:
         uv sync
     - name: Test with pytest
       run: |
-        pytest backend/tests/test_knowledge_graph.py
+        uv run pytest backend/tests
