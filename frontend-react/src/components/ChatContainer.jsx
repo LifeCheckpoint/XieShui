@@ -35,7 +35,7 @@ export default function() {
   const [waitingForQuestionAnswer, setWaitingForQuestionAnswer] = React.useState(false); // 新增状态
   const [questionPayload, setQuestionPayload] = React.useState(null); // 存储问题和选项
 
-  const { sendMessage, lastMessage } = useWebSocket('http://localhost:7222');
+  const { sendMessage, lastMessage } = useWebSocket();
 
   useEffect(() => {
     // 初始化 threadId

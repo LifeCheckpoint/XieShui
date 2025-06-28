@@ -32,7 +32,7 @@ const LoginPage = () => {
     }
   }, [pendingAuth]);
 
-  const { sendMessage, lastMessage } = useWebSocket('ws://localhost:7223', handleConnected); // 使用 WebSocket Hook，并传入回调
+  const { sendMessage, lastMessage } = useWebSocket(handleConnected); // 使用 WebSocket Hook，并传入回调
 
   useEffect(() => {
     if (lastMessage) {
@@ -98,113 +98,112 @@ const LoginPage = () => {
       padding: 2
     }}>
       <Container maxWidth="sm" sx={{ position: 'relative' }}>
-        {/* 选项卡放在顶部 */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom align="center">
+            欢迎使用XieShui
+          </Typography>
           <Tabs
             value={activeTab}
             onChange={(e, newValue) => setActiveTab(newValue)}
             variant="fullWidth"
-            sx={{ width: '100%' }}
+            sx={{ mb: 3 }}
           >
             <Tab label="登录" value="login" />
             <Tab label="注册" value="register" />
           </Tabs>
-        </Box>
-        
-        {/* 简化布局，移除动画 */}
-        <Box sx={{ mb: 3 }}>
+
           {activeTab === 'login' ? (
-            <Paper elevation={3} sx={{ padding: 3 }}>
-              <Typography variant="h5" align="center" gutterBottom>
-                登录 XieShui
-              </Typography>
-              <Box component="form" onSubmit={handleLoginSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label="学号/ID 或 用户名"
-                  id="loginIdentifier"
-                  value={loginData.identifier}
-                  onChange={(e) => setLoginData({...loginData, identifier: e.target.value})}
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label="密码"
-                  id="loginPassword"
-                  type="password"
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  fullWidth
-                />
-                <Button type="submit" variant="contained" color="primary">
-                  登录
-                </Button>
-              </Box>
-            </Paper>
+            <form onSubmit={handleLoginSubmit}>
+              <TextField
+                label="学号/工号"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={loginData.identifier}
+                onChange={(e) => setLoginData({ ...loginData, identifier: e.target.value })}
+              />
+              <TextField
+                label="密码"
+                type="password"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={loginData.password}
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                size="large"
+                sx={{ mt: 2 }}
+              >
+                登录
+              </Button>
+            </form>
           ) : (
-            <Paper elevation={3} sx={{ padding: 3 }}>
-              <Typography variant="h5" align="center" gutterBottom>
-                注册 XieShui
-              </Typography>
-              <Box component="form" onSubmit={handleRegisterSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label="学号/ID"
-                  id="registerId"
-                  value={registerData.id}
-                  onChange={(e) => setRegisterData({...registerData, id: e.target.value})}
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label="用户名"
-                  id="registerUsername"
-                  value={registerData.username}
-                  onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label="密码 (学生/教师可为空)"
-                  id="registerPassword"
-                  type="password"
-                  value={registerData.password}
-                  onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                  fullWidth
-                />
-                <FormControl fullWidth>
-                  <InputLabel id="registerRole-label">角色</InputLabel>
-                  <Select
-                    labelId="registerRole-label"
-                    id="registerRole"
-                    value={registerData.role}
-                    label="角色"
-                    onChange={(e) => setRegisterData({...registerData, role: e.target.value})}
-                    required
-                  >
-                    <MenuItem value="student">学生</MenuItem>
-                    <MenuItem value="teacher">教师</MenuItem>
-                    <MenuItem value="admin">系统管理员</MenuItem>
-                  </Select>
-                </FormControl>
-                <Button type="submit" variant="contained" color="primary">
-                  注册
-                </Button>
-              </Box>
-            </Paper>
+            <form onSubmit={handleRegisterSubmit}>
+              <TextField
+                label="学号/工号"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={registerData.id}
+                onChange={(e) => setRegisterData({ ...registerData, id: e.target.value })}
+              />
+              <TextField
+                label="用户名"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={registerData.username}
+                onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+              />
+              <TextField
+                label="密码"
+                type="password"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={registerData.password}
+                onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+              />
+              <FormControl fullWidth margin="normal">
+                <InputLabel>角色</InputLabel>
+                <Select
+                  value={registerData.role}
+                  label="角色"
+                  onChange={(e) => setRegisterData({ ...registerData, role: e.target.value })}
+                >
+                  <MenuItem value="student">学生</MenuItem>
+                  <MenuItem value="teacher">教师</MenuItem>
+                  <MenuItem value="admin">管理员</MenuItem>
+                </Select>
+              </FormControl>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                size="large"
+                sx={{ mt: 2 }}
+              >
+                注册
+              </Button>
+            </form>
           )}
-        </Box>
-        
-        {message.text && (
-          <Box
-            sx={{
-              p: 2,
-              backgroundColor: message.type === 'error' ? '#ffebee' : '#e8f5e9',
-              color: message.type === 'error' ? '#b71c1c' : '#2e7d32',
-              borderRadius: 1
-            }}
-          >
-            {message.text}
-          </Box>
-        )}
+
+          {message.text && (
+            <Typography
+              color={message.type === 'error' ? 'error' : 'primary'}
+              align="center"
+              sx={{ mt: 2 }}
+            >
+              {message.text}
+            </Typography>
+          )}
+        </Paper>
       </Container>
     </Box>
   );
