@@ -4,13 +4,12 @@
 在 backend 目录下使用如下命令
 uv run app.py
 """
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
 from extensions import db
 from auth import register_user, login_user
 from image_upload import handle_image_upload
-from chat_handler import send_text_msg_ws, send_agent_status_ws, send_stop_msg_ws
+from chat_handler import route_chat
 import traceback
 import os
 from models import AuthRequestPayload, AuthResponsePayload, ChatRequestPayload, ChatResponsePayload, ImageUploadRequestPayload, ImageUploadResponsePayload, ChatMessage, QuestionRequestPayload, AgentStatusContent # 导入新的模型
@@ -19,11 +18,6 @@ import logging # 导入 logging 模块
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-# 初始化chat_handler的socketio
-from chat_handler import init_socketio
-init_socketio(socketio)
 
 # 配置日志记录器
 app.logger.setLevel(logging.INFO) # 设置日志级别为 INFO
