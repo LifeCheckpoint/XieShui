@@ -14,8 +14,8 @@ class Knowledge_Node(BaseModel):
     
 
 class Knowledge_Edge(BaseModel):
-    id: str
-    title:str
+    id:str = Field(default_factory=lambda:str(uuid.uuid4())[:8])
+    title:str = None
     start_node: Knowledge_Node
     end_node: Knowledge_Node
     description: Optional[str]
@@ -60,7 +60,7 @@ class Knowledge_Graph(BaseModel):
         node = self.nodes[node_id]
         if node.id not in self.nodes:
             raise ValueError(f"节点ID{node.id}不存在")
-        out_edge_list = [self.egdes[id] for id in node.out_edge]
+        out_edge_list = [self.edges[id] for id in node.out_edge]
         return out_edge_list
 
     def get_in_edge(self, node_id: str):
@@ -77,16 +77,18 @@ class Knowledge_Graph(BaseModel):
         node_list = []
         for edge_id in node.in_edge:
             edge = self.edges[edge_id]
-            node_list.append(edge.start_node)
-            node_list.append(edge.end_node)
+            node_list.append(edge.start_node.id)
+            node_list.append(edge.end_node.id)
         for edge_id in node.out_edge:
-            edge = self.edges[edge.id]
-            node_list.append(edge.start_node)
-            node_list.append(edge.end_node)
+            edge = self.edges[edge_id]
+            node_list.append(edge.start_node.id)
+            node_list.append(edge.end_node.id)
 
         node_list = list(set(node_list))
-        node_list.remove(node)
-        return node_list
+        node_list.remove(node.id)
+        new_node_list = [self.nodes[node_id] for node_id in node_list]
+        return new_node_list
+
 
     def remove_node(self, node_id: str):
         node = self.nodes[node_id]
@@ -172,5 +174,21 @@ class Knowledge_Graph(BaseModel):
         self.bfs_directed_path(graph,start_node_id,goal_node_id)
         
     
-use = Knowledge_Node(name = 'dht')
-print(use.id)
+user_1 = Knowledge_Node(name = 'dht',content = 'a student of hit')
+user_2 = Knowledge_Node(name = 'ldd',content='a student of sustech')
+user_3 = Knowledge_Node(name='yy',description='he like reading books')
+
+edge_1 = Knowledge_Edge(start_node=user_1,end_node=user_2,description='dht think ldd like loli')
+edge_2 = Knowledge_Edge(start_node=user_2,end_node=user_3,description='ldd think yy uses phone too much time')
+edge_3 = Knowledge_Edge(start_node=user_3,end_node=user_1,description='yy and dht both played Honkai Star Rail')
+
+
+graph = Knowledge_Graph()
+graph.add_node(user_1)
+graph.add_node(user_2)
+graph.add_node(user_3)
+graph.add_edge(edge_1)
+graph.add_edge(edge_2)
+graph.add_edge(edge_3)
+graph.remove_node(user_1.id)
+graph.get_neighbours(user_1.id)
