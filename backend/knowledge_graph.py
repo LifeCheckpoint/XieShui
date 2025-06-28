@@ -1,19 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from typing import Optional, Dict, Any, List
 from collections import deque
-
+import uuid
 
 class Knowledge_Node(BaseModel):
-    id: str
+    id:str = Field(default_factory=lambda:str(uuid.uuid4())[:8])
     name: str
-    title:str
+    title:str = None
     description: Optional[str] = None  # optional的意思是可以没有，有的话变量类型就是str
     content: Optional[Any] = None
     in_edge: List[str] = []
     out_edge: List[str] = []
-    end_node:List[str] = []
-    start_node:List[str] = []
-
+    
 
 class Knowledge_Edge(BaseModel):
     id: str
@@ -27,18 +25,10 @@ class Knowledge_Graph(BaseModel):
     nodes: Dict[str, Knowledge_Node] = {}
     edges: Dict[str, Knowledge_Edge] = {}
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        self.nodes = data.get("nodes", {})
-        self.edges = data.get("edges", {})
-        self.node_connection = data.get(
-            "node_connection", {}
-        )  # ai写的，这三句不是很理解
-
     def add_node(self, node: Knowledge_Node):
         if node.id in self.nodes:
             raise ValueError(f"节点ID{node.id}已存在")
-        self.nodes[node.id] = node
+        self.nodes[node.id] = node 
 
     def add_edge(self, edge: Knowledge_Edge):
         if edge.start_node.id not in self.nodes:
@@ -66,18 +56,18 @@ class Knowledge_Graph(BaseModel):
         edge_list = list(self.edges.values())
         return edge_list
 
-    def get_out_node(self, node_id: str):
+    def get_out_edge(self, node_id: str):
         node = self.nodes[node_id]
         if node.id not in self.nodes:
             raise ValueError(f"节点ID{node.id}不存在")
-        out_edge_list = [self.nodes[id] for id in node.out_edge]
+        out_edge_list = [self.egdes[id] for id in node.out_edge]
         return out_edge_list
 
-    def get_in_node(self, node_id: str):
+    def get_in_edge(self, node_id: str):
         node = self.nodes[node_id]
         if node.id not in self.nodes:
             raise ValueError(f"节点ID{node.id}不存在")
-        in_edge_list = [self.nodes[id] for id in node.in_edge]
+        in_edge_list = [self.edges[id] for id in node.in_edge]
         return in_edge_list
 
     def get_neighbours(self, node_id: str):
@@ -182,3 +172,5 @@ class Knowledge_Graph(BaseModel):
         self.bfs_directed_path(graph,start_node_id,goal_node_id)
         
     
+use = Knowledge_Node(name = 'dht')
+print(use.id)
