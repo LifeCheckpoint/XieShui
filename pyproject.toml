@@ -18,5 +18,4 @@ dependencies = [
     "langchain[openai]>=0.3.25",
     "langgraph>=0.4.8",
     "pymupdf>=1.26.0",
-    "websockets>=15.0.1",
 ]

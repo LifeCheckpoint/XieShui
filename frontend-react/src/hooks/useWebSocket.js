@@ -1,41 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  sendMessage as wsSendMessage,
-  onMessage as wsOnMessage,
-  onConnectionStatusChange as wsOnConnectionStatusChange
-} from '../utils/websocketService';
+import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
 
-const useWebSocket = (onConnected) => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState(null);
-
+export default function useWebSocket() {
+  const [socket, setSocket] = useState(null);
+  
   useEffect(() => {
-    // 监听连接状态变化
-    const cleanupStatusListener = wsOnConnectionStatusChange((connected) => {
-      setIsConnected(connected);
-      if (connected && onConnected && typeof onConnected === 'function') {
-        onConnected();
-      }
-    });
-
-    // 监听消息
-    const cleanupMessageListener = wsOnMessage((message) => {
-      console.log('WebSocket message received:', message);
-      setLastMessage(message);
-    });
-
-    return () => {
-      cleanupStatusListener();
-      cleanupMessageListener();
-    };
-  }, [onConnected]);
-
-  const sendMessage = useCallback((message) => {
-    console.log('WebSocket message sent:', message);
-    wsSendMessage(message);
+    const newSocket = io('http://localhost:7222');
+    setSocket(newSocket);
+    
+    return () => newSocket.disconnect();
   }, []);
-
-  return { isConnected, lastMessage, sendMessage };
-};
-
-export default useWebSocket;
+  
+  return socket;
+}
