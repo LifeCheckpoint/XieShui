@@ -171,26 +171,26 @@ class Knowledge_Graph(BaseModel):
         graph = self.create_graph
         self.bfs_directed_path(graph, start_node_id, goal_node_id)
 
-
-user_1 = Knowledge_Node(name="dht", content="a student of hit")
-user_2 = Knowledge_Node(name="ldd", content="a student of sustech")
-user_3 = Knowledge_Node(name="yy", description="he like reading books")
-
-edge_1 = Knowledge_Edge(
-    start_node=user_1, end_node=user_2, description="dht think ldd like loli"
-)
-edge_2 = Knowledge_Edge(
-    start_node=user_2,
-    end_node=user_3,
-    description="ldd think yy uses phone too much time",
-)
-edge_3 = Knowledge_Edge(
-    start_node=user_3,
-    end_node=user_1,
-    description="yy and dht both played Honkai Star Rail",
-)
-
 if __name__ == '__main__':
+    user_1 = Knowledge_Node(name="dht", content="a student of hit")
+    user_2 = Knowledge_Node(name="ldd", content="a student of sustech")
+    user_3 = Knowledge_Node(name="yy", description="he like reading books")
+
+    edge_1 = Knowledge_Edge(
+        start_node=user_1, end_node=user_2, description="dht think ldd like loli"
+    )
+    edge_2 = Knowledge_Edge(
+        start_node=user_2,
+        end_node=user_3,
+        description="ldd think yy uses phone too much time",
+    )
+    edge_3 = Knowledge_Edge(
+        start_node=user_3,
+        end_node=user_1,
+        description="yy and dht both played Honkai Star Rail",
+    )
+
+
     graph = Knowledge_Graph()
     graph.add_node(user_1)
     graph.add_node(user_2)
