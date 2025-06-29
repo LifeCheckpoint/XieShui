@@ -1,6 +1,5 @@
 from langchain_core.runnables.base import Runnable
 from typing import List, Dict, Union, Callable, Any, Literal, Tuple
-from chat_handler import send_agent_msg
 from pydantic import BaseModel
 from pathlib import Path
 import importlib
@@ -17,7 +16,7 @@ class ToolInfo(BaseModel):
     name: str
     tool_description: str
     tool_type: Literal["workflow", "toolfunc"]
-    function: Callable[[], Union[Runnable, str]]
+    function: Callable[..., Any] # 修改为可接受任意参数的可调用对象
 
 tool_list: List[ToolInfo] = []
 """
@@ -108,13 +107,14 @@ def call_tools(call_dict: Dict[str, Union[str, Dict[str, str]]]) -> Union[str, T
 
             elif tool.tool_type == "toolfunc":
                 # 如果是函数类型，直接调用
-                result = tool.function(**params)
+                result = tool.function(**(params if isinstance(params, dict) else {})) # 确保 params 是字典
             
             return result
     
     raise ValueError(f"未找到名为 '{name}' 的工具")
 
 def set_agent_status(status: str, message: str) -> Callable[[Any], Any]:
+    from chat_handler import send_agent_msg
     """
     生成 Agent 状态消息，注意这里返回的是提供给 RunnableLambda 的函数
 

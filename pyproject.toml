@@ -10,13 +10,10 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "flask>=3.1.1",
-    "flask-cors>=6.0.0",
-    "flask-socketio>=5.5.1",
     "flask-sqlalchemy>=3.1.1",
     "langchain-community>=0.3.24",
     "langchain[openai]>=0.3.25",
     "langgraph>=0.4.8",
     "pymupdf>=1.26.0",
-    "pytest>=8.4.1",
+    "websockets>=15.0.1",
 ]
