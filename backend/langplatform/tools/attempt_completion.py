@@ -13,6 +13,6 @@ class AttemptCompletionSchema(BaseModel):
     )
 
 @tool("attempt_completion", args_schema=AttemptCompletionSchema)
-def attempt_completion(status: str, message: str) -> str:
+def attempt_completion(status: str, message: str) -> tuple[str, str]:
     """当任务完成时调用此工具，通知系统任务状态。必须提供状态和消息参数。"""
-    return f"任务完成状态：{status}\n\n{message}"
+    return "finish", f"任务完成状态：{status}\n\n{message}"

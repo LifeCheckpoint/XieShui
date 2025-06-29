@@ -45,7 +45,7 @@ os.makedirs(TEMP_IMAGE_DIR, exist_ok=True)
 async def send_message(websocket: Any, message: WebSocketMessage):
     """发送 WebSocket 消息到指定客户端"""
     try:
-        message_json = json.dumps(message.model_dump())
+        message_json = json.dumps(message.model_dump(), ensure_ascii=False)
         logger.info(f"Sending message to {websocket.remote_address}: {message_json}")
         await websocket.send(message_json)
     except websockets.exceptions.ConnectionClosedOK:

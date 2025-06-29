@@ -35,23 +35,44 @@ class AgentResponseHandler:
                 )
                 return # 暂停处理，等待用户响应
 
-        # 检查是否有 Agent 状态信息 (例如进入某个节点)
-        if "agent" in stream_output: # Agent 节点执行
-            yield send_agent_msg("thinking", "Agent 正在思考...", current_node="agent")
-        if "tools" in stream_output: # 工具节点执行
-            yield send_agent_msg("tool_calling", "Agent 正在调用工具...", current_node="tools")
-        
-        # 提取最新的消息并转换为 ChatResponsePayload
-        if "messages" in stream_output:
-            latest_message = stream_output["messages"][-1]
-            if isinstance(latest_message, AIMessage):
-                # 如果是 AI 的文本响应
-                content_to_send = str(latest_message.content) if not isinstance(latest_message.content, str) else latest_message.content
-                yield send_text_msg(content_to_send)
-            elif isinstance(latest_message, ToolMessage):
-                # 如果是工具消息，表示工具执行结果
-                yield send_agent_msg("tool_result", f"工具 {latest_message.name} 执行完毕。", tool_name=latest_message.name)
-                # 确保 content 是字符串
-                content_to_send = str(latest_message.content) if not isinstance(latest_message.content, str) else latest_message.content
-                yield send_text_msg(content_to_send) # 工具的输出内容
-            # 其他类型的消息根据需要处理
+        # 检查流输出中是否有节点名称
+        for node_name, node_output in stream_output.items():
+            if node_name == "__end__":
+                continue # 跳过结束标记
+
+            # 发送节点状态消息
+            if node_name == "agent":
+                yield send_agent_msg("thinking", "Agent 正在思考...", current_node="agent")
+            elif node_name == "tools":
+                yield send_agent_msg("tool_calling", "Agent 正在调用工具...", current_node="tools")
+
+            # 检查节点输出中是否有消息
+            if isinstance(node_output, dict) and "messages" in node_output:
+                latest_message = node_output["messages"][-1]
+                
+                # 添加日志以检查消息类型和内容
+                print(f"DEBUG: latest_message type: {type(latest_message)}")
+                print(f"DEBUG: latest_message content: {latest_message.content}")
+
+                if isinstance(latest_message, AIMessage):
+                    # 如果是 AI 的文本响应
+                    content_to_send = str(latest_message.content) if not isinstance(latest_message.content, str) else latest_message.content
+                    print(f"DEBUG: Yielding text message: {content_to_send}")
+                    yield send_text_msg(content_to_send)
+                elif isinstance(latest_message, ToolMessage):
+                    # 如果是工具消息，表示工具执行结果
+                    print(f"DEBUG: Yielding tool result message for tool: {latest_message.name}")
+                    yield send_agent_msg("tool_result", f"工具 {latest_message.name} 执行完毕。", tool_name=latest_message.name)
+                    # 确保 content 是字符串
+                    content_to_send = str(latest_message.content) if not isinstance(latest_message.content, str) else latest_message.content
+                    print(f"DEBUG: Yielding text message for tool output: {content_to_send}")
+                    yield send_text_msg(content_to_send) # 工具的输出内容
+                    
+                    # 检查是否是 attempt_completion 工具的返回，如果是，则停止对话
+                    if latest_message.name == "attempt_completion" and isinstance(latest_message.content, str):
+                        print("DEBUG: Attempt completion tool called. Sending stop message.")
+                        yield send_stop_msg()
+                        return # 停止处理，因为对话已完成
+                else:
+                    print(f"DEBUG: Unhandled message type: {type(latest_message)}")
+                # 其他类型的消息根据需要处理

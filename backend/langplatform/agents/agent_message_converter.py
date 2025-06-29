@@ -15,10 +15,15 @@ def convert_chat_messages_to_langchain_messages(history: List[ChatMessage], curr
     """
     langchain_messages = []
     for msg in history:
+        text_content = msg.content.get("text", "")
+        # 过滤掉 Agent 状态消息
+        if msg.role == "assistant" and text_content.startswith("Agent 状态:"):
+            continue
+        
         if msg.role == "user":
-            langchain_messages.append(HumanMessage(content=msg.content.get("text", "")))
+            langchain_messages.append(HumanMessage(content=text_content))
         elif msg.role == "assistant":
-            langchain_messages.append(AIMessage(content=msg.content.get("text", "")))
+            langchain_messages.append(AIMessage(content=text_content))
     
     if current_text:
         langchain_messages.append(HumanMessage(content=current_text))
