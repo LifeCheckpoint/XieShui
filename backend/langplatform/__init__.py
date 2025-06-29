@@ -1,6 +1,6 @@
 from langchain_core.runnables.base import Runnable
 from typing import List, Dict, Union, Callable, Any, Literal, Tuple
-from ..chat_handler import send_agent_msg
+from chat_handler import send_agent_msg
 from pydantic import BaseModel
 from pathlib import Path
 import importlib

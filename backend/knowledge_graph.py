@@ -91,15 +91,15 @@ class Knowledge_Graph(BaseModel):
         return new_node_list
 
     def remove_node(self, node_id: str):
+        if node_id not in self.nodes:
+            raise ValueError(f"节点ID{node_id}不存在")
         node = self.nodes[node_id]
-        if node.id not in self.nodes:
-            raise ValueError(f"节点ID{node.id}不存在")
         for edge_id in node.in_edge:
             edge = self.edges[edge_id]
             edge.start_node.out_edge.remove(edge_id)
             del self.edges[edge_id]
 
-        for egde_id in node.out_edge:
+        for edge_id in node.out_edge:
             edge = self.edges[edge_id]
             edge.end_node.in_edge.remove(edge_id)
             del self.edges[edge_id]
@@ -107,82 +107,61 @@ class Knowledge_Graph(BaseModel):
         del self.nodes[node_id]
 
     def remove_edge(self, edge_id: str):
+
+        if edge_id not in self.edges:
+            raise ValueError(f"节点ID{edge_id}不存在")
         edge = self.edges[edge_id]
-        if edge.id not in self.edges:
-            raise ValueError(f"节点ID{edge.id}不存在")
         edge.start_node.out_edge.remove(edge_id)
         edge.end_node.in_edge.remove(edge_id)
         del self.edges[edge_id]
 
-    def create_graph(self):
-        graph: Dict[str, List] = {}
-        for node_id in self.nodes:
-            edge_list = self.nodes[node_id].out_edge
-            node_list = []
-            for edge_id in edge_list:
-                edge = self.edges[edge_id]
-                node_list.append(edge.end_node.id)
-            graph[node_id] = node_list
-        return graph
+    def find_path(self, start_id: str, end_id: str) -> List[str]:
+        """使用 BFS 查找两个节点之间的最短路径，返回节点 ID 列表"""
+        if start_id not in self.nodes or end_id not in self.nodes:
+            raise ValueError("起始或终止节点不存在")
 
-    def bfs_directed_path(graph, start, goal):
-        """
-        在有向图中使用BFS查找从start到goal的路径
-
-        参数:
-        graph: 字典表示的有向图结构，键是节点，值是该节点指向的邻居列表
-        start: 起始节点
-        goal: 目标节点
-
-        返回:
-        从start到goal的路径列表，如果不存在路径则返回None
-        """
-        # 记录每个节点的父节点和是否已访问
-        parent = {start: None}
-        visited = set([start])
-        queue = deque([start])
+        visited = set()
+        queue = deque()
+        queue.append([start_id])  # 存储路径
 
         while queue:
-            current = queue.popleft()
+            path = queue.popleft()
+            node_id = path[-1]
 
-            # 如果找到目标节点，回溯构建路径
-            if current == goal:
-                path = []
-                while current is not None:
-                    path.append(current)
-                    current = parent[current]
-                return path[::-1]  # 反转路径，从start到goal
+            if node_id == end_id:
+                return path  # 找到路径
 
-            # 遍历当前节点指向的所有邻居
-            for neighbor in graph.get(current, []):
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    parent[neighbor] = current
-                    queue.append(neighbor)
+            if node_id not in visited:
+                visited.add(node_id)
+                # 获取当前节点的所有邻居
+                neighbors = []
+                node = self.nodes[node_id]
+                for edge_id in node.out_edge:
+                    edge = self.edges[edge_id]
+                    neighbors.append(edge.end_node.id)
+                for edge_id in node.in_edge:
+                    edge = self.edges[edge_id]
+                    neighbors.append(edge.start_node.id)
 
-        return None  # 没有找到路径
+                for neighbor in neighbors:
+                    new_path = list(path)
+                    new_path.append(neighbor)
+                    queue.append(new_path)
 
-    def find_path(self, start_node_id, goal_node_id):
-        if start_node_id not in self.nodes:
-            raise ValueError(f"节点ID{start_node_id}不存在")
-        elif goal_node_id not in self.nodes:
-            raise ValueError(f"节点ID{goal_node_id}不存在")
-
-        graph = self.create_graph
-        self.bfs_directed_path(graph, start_node_id, goal_node_id)
-
+        return []  # 没有找到路径
+    
 if __name__ == '__main__':
     user_1 = Knowledge_Node(name="dht", content="a student of hit")
     user_2 = Knowledge_Node(name="ldd", content="a student of sustech")
     user_3 = Knowledge_Node(name="yy", description="he like reading books")
 
     edge_1 = Knowledge_Edge(
-        start_node=user_1, end_node=user_2, description="dht think ldd like loli"
+        start_node=user_1, end_node=user_2, description="dht thinks ldd likes loli"
     )
     edge_2 = Knowledge_Edge(
         start_node=user_2,
         end_node=user_3,
-        description="ldd think yy uses phone too much time",
+        description="ldd thinks yy uses phone too much time",
     )
     edge_3 = Knowledge_Edge(
         start_node=user_3,
@@ -198,5 +177,4 @@ if __name__ == '__main__':
     graph.add_edge(edge_1)
     graph.add_edge(edge_2)
     graph.add_edge(edge_3)
-    graph.remove_node(user_1.id)
-    graph.get_neighbours(user_1.id)
+    graph.find_path(user_1.id,user_2.id)
