@@ -79,7 +79,7 @@ async def handle_chat_request_ws(websocket: Any, payload: ChatRequestPayload):
         resume_data = payload.resume_data
 
         with _temp_app.app_context(): # 确保在数据库上下文中执行
-            for response_payload in route_chat(payload.history, payload.current_text, payload.current_image_paths, thread_id, resume_data):
+            async for response_payload in route_chat(payload.history, payload.current_text, payload.current_image_paths, thread_id, resume_data):
                 logger.info(f"Emitting chat_response: {response_payload.model_dump()}")
                 await send_message(websocket, WebSocketMessage(type="chat_response", payload=response_payload.model_dump()))
     except Exception as e:

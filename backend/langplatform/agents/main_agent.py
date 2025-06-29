@@ -81,7 +81,7 @@ class MainAgentGraph:
         try:
             # 获取 LLM 实例并绑定工具
             # LLM 会根据消息历史和可用工具，决定是生成文本响应还是调用工具。
-            llm = llm_manager.get_llm("deepseek_r1").bind_tools(self.langchain_tools)
+            llm = llm_manager.get_llm("google/gemini-2.5-flash").bind_tools(self.langchain_tools)
             
             # 调用 LLM 处理当前消息历史
             response = llm.invoke(state["messages"])
@@ -204,9 +204,6 @@ async def create_main_agent_graph() -> MainAgentGraph:
     这个函数负责初始化 MCP 客户端，连接到工具服务，并获取可用的工具。
     """
     # 获取当前工作目录，用于 MCP 服务器的 cwd 参数
-    # Path(__file__).parent 是 backend/langplatform/agents
-    # .parent.parent 是 backend/langplatform
-    # .parent.parent.parent 是 backend
     # .parent.parent.parent.parent 是项目根目录 d:/wroot/XieShui
     cwd = Path(__file__).parent.parent.parent.parent
     logger.info(f"Current MCP connection directory: {cwd}")
