@@ -81,7 +81,7 @@ class MainAgentGraph:
         try:
             # 获取 LLM 实例并绑定工具
             # LLM 会根据消息历史和可用工具，决定是生成文本响应还是调用工具。
-            llm = llm_manager.get_llm("google/gemini-2.5-flash").bind_tools(self.langchain_tools)
+            llm = llm_manager.get_llm("gemini-2.5-flash").bind_tools(self.langchain_tools)
             
             # 调用 LLM 处理当前消息历史
             response = llm.invoke(state["messages"])
@@ -203,28 +203,29 @@ async def create_main_agent_graph() -> MainAgentGraph:
     异步创建 MainAgentGraph 实例，并从 MCP 服务器获取工具。
     这个函数负责初始化 MCP 客户端，连接到工具服务，并获取可用的工具。
     """
-    # 获取当前工作目录，用于 MCP 服务器的 cwd 参数
-    # .parent.parent.parent.parent 是项目根目录 d:/wroot/XieShui
-    cwd = Path(__file__).parent.parent.parent.parent
-    logger.info(f"Current MCP connection directory: {cwd}")
-    
-    # 创建 StdioConnection 配置，用于连接 MCP 工具服务
-    # command: 启动 MCP 服务器的命令
-    # args: 传递给命令的参数
-    # cwd: MCP 服务器的工作目录
-    # encoding: 用于标准输入/输出的编码
-    connection = StdioConnection(
-        command="uv",
-        args=["run", "python", "-m", "backend.langplatform.tools.mcp_core_tools"],
-        cwd=cwd,
-        encoding="utf-8",
-    )
-    
-    # 创建 MultiServerMCPClient 实例，连接到配置的 MCP 工具服务
-    mcp_client = MultiServerMCPClient(connections={"core_tools": connection})
-    
-    # 从 MCP 客户端获取所有可用的工具
-    tools = await mcp_client.get_tools()
-    
-    # 使用获取到的工具列表初始化 MainAgentGraph
-    return MainAgentGraph(tools)
+    try:
+        cwd = Path(__file__).parent.parent / "tools"
+        logger.info(f"Current MCP connection directory: {cwd}")
+        
+        mcp_command = "uv"
+        mcp_args = ["run", "python", "mcp_core_tools.py"]
+        logger.info(f"Attempting to create StdioConnection with command: {mcp_command}, args: {mcp_args}, cwd: {cwd}")
+
+        connection = StdioConnection(
+            transport="stdio", # 明确指定 transport 类型
+            command=mcp_command,
+            args=mcp_args,
+            cwd=cwd,
+            encoding="utf-8",
+        )
+        logger.info("StdioConnection created successfully.")
+        
+        logger.info("Attempting to create MultiServerMCPClient and get tools...")
+        mcp_client = MultiServerMCPClient(connections={"core_tools": connection})
+        tools = await mcp_client.get_tools()
+        logger.info(f"Successfully retrieved {len(tools)} tools from MCP server.")
+        
+        return MainAgentGraph(tools)
+    except Exception as e:
+        logger.error(f"Error during create_main_agent_graph: {e}", exc_info=True)
+        raise # 重新抛出异常，以便上层捕获并处理

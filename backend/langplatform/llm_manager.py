@@ -39,19 +39,19 @@ class LLMManager:
         return self.models[model_name]
 
 llm_config = {
-    "deepseek_r1": {
+    "deepseek-r1": {
         "provider": "openrouter",
         "model": "deepseek/deepseek-r1-0528",
         "api_key_env": "OPENROUTER_API_KEY",
         "temperature": 0.25,
     },
-    "deepseek_v3": {
+    "deepseek-v3": {
         "provider": "openrouter",
         "model": "deepseek/deepseek-chat-v3-0324",
         "api_key_env": "OPENROUTER_API_KEY",
         "temperature": 0.25,
     },
-    "gemini_2.5_flash": {
+    "gemini-2.5-flash": {
         "provider": "openrouter",
         "model": "google/gemini-2.5-flash",
         "api_key_env": "OPENROUTER_API_KEY",
