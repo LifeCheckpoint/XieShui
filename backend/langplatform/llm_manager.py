@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, Any
 from langchain_core.language_models import BaseChatModel
-from langchain.chat_models import init_chat_model
+from langchain_community.chat_models.openai import ChatOpenAI
 
 class LLMManager:
     def __init__(self, config: Dict[str, Any]):
@@ -30,31 +30,40 @@ class LLMManager:
             if not api_key:
                 raise ValueError(f"API key for model '{model_name}' not found in environment variables")
 
-            self.models[model_name] = init_chat_model(
+            # TODO 重构
+
+            self.models[model_name] = ChatOpenAI(
                 model=model_config.get("model"),
-                model_provider=model_config.get("provider"),
                 temperature=model_config.get("temperature", 0.7),
+                base_url="https://openrouter.ai/api/v1",
                 api_key=api_key,
             )
+
+            # self.models[model_name] = init_chat_model(
+            #     model=model_config.get("model"),
+            #     model_provider=model_config.get("provider"),
+            #     temperature=model_config.get("temperature", 0.7),
+            #     api_key=api_key,
+            # )
         return self.models[model_name]
 
 llm_config = {
     "deepseek-r1": {
-        "provider": "openrouter",
+        "provider": "openai",
         "model": "deepseek/deepseek-r1-0528",
-        "api_key_env": "OPENROUTER_API_KEY",
+        "api_key_env": "openrouter",
         "temperature": 0.25,
     },
     "deepseek-v3": {
-        "provider": "openrouter",
+        "provider": "openai",
         "model": "deepseek/deepseek-chat-v3-0324",
-        "api_key_env": "OPENROUTER_API_KEY",
+        "api_key_env": "openrouter",
         "temperature": 0.25,
     },
     "gemini-2.5-flash": {
-        "provider": "openrouter",
+        "provider": "openai",
         "model": "google/gemini-2.5-flash",
-        "api_key_env": "OPENROUTER_API_KEY",
+        "api_key_env": "openrouter",
         "temperature": 0.55,
     }
 }
