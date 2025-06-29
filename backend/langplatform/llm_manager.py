@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, Any
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
+from .utils.api_key_loader import load_api_key
 
 class LLMManager:
     def __init__(self, config: Dict[str, Any]):
@@ -15,27 +16,23 @@ class LLMManager:
             if not model_config:
                 raise ValueError(f"Model '{model_name}' not found in config")
             
-            # 从文件加载 API Key
-            file = Path(__file__).parent / "api_key.json"
-            if file.exists():
-                import json
-                with open(file, 'r') as f:
-                    api_keys = json.load(f)
-            else:
-                api_keys = {}
-            
-            # 检查是否有对应模型的 API Key
-            api_key = api_keys.get("openrouter", None) # TODO 不同供应商
+            provider = model_config.get("provider")
+            if not provider:
+                raise ValueError(f"Model '{model_name}' has no provider defined in config")
+
+            api_key = load_api_key(provider)
 
             if not api_key:
-                raise ValueError(f"API key for model '{model_name}' not found in environment variables")
+                raise ValueError(f"API key for provider '{provider}' not found in environment variables or api_key.json")
 
-            # TODO 重构
+            base_url = model_config.get("base_url")
+            if not base_url:
+                raise ValueError(f"Model '{model_name}' has no base_url defined in config")
 
             self.models[model_name] = ChatOpenAI(
                 model=model_config.get("model"),
                 temperature=model_config.get("temperature", 0.7),
-                base_url="https://openrouter.ai/api/v1",
+                base_url=base_url,
                 api_key=api_key,
                 disable_streaming=True,
             )
@@ -44,21 +41,21 @@ class LLMManager:
 
 llm_config = {
     "deepseek-r1": {
-        "provider": "openai",
+        "provider": "openrouter",
         "model": "deepseek/deepseek-r1-0528",
-        "api_key_env": "openrouter",
+        "base_url": "https://openrouter.ai/api/v1",
         "temperature": 0.25,
     },
     "deepseek-v3": {
-        "provider": "openai",
+        "provider": "openrouter",
         "model": "deepseek/deepseek-chat-v3-0324",
-        "api_key_env": "openrouter",
+        "base_url": "https://openrouter.ai/api/v1",
         "temperature": 0.25,
     },
     "gemini-2.5-flash": {
-        "provider": "openai",
+        "provider": "openrouter",
         "model": "google/gemini-2.5-flash",
-        "api_key_env": "openrouter",
+        "base_url": "https://openrouter.ai/api/v1",
         "temperature": 0.55,
     }
 }

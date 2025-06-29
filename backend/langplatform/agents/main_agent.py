@@ -1,19 +1,17 @@
-from typing import Annotated, TypedDict, List, Any, Union, Dict, Optional, Generator
+from typing import Annotated, TypedDict, List, Any, Dict, Optional, Generator
 import logging
-import asyncio
-from langchain_mcp_adapters.client import MultiServerMCPClient, StdioConnection
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.types import Command, Interrupt
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, BaseMessage
+from langgraph.types import Command
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
-from pathlib import Path
-from ..llm_manager import llm_manager
 from utils.message_utils import send_text_msg, send_agent_msg, send_stop_msg
 from models import ChatMessage, ChatResponsePayload, ChatResponseContent, QuestionRequestPayload, AgentStatusContent
+from ..llm_manager import llm_manager
+from .agent_message_converter import convert_chat_messages_to_langchain_messages
+from .agent_response_handler import AgentResponseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -131,16 +129,7 @@ class MainAgentGraph:
         config = RunnableConfig(configurable={"thread_id": thread_id})
         
         # 将 ChatMessage 转换为 LangChain 消息格式
-        langchain_messages = []
-        for msg in history:
-            if msg.role == "user":
-                langchain_messages.append(HumanMessage(content=msg.content.get("text", "")))
-            elif msg.role == "assistant":
-                langchain_messages.append(AIMessage(content=msg.content.get("text", "")))
-        
-        # 添加当前用户输入到消息历史
-        if current_text: # 只有当有新的文本输入时才添加
-            langchain_messages.append(HumanMessage(content=current_text))
+        langchain_messages = convert_chat_messages_to_langchain_messages(history, current_text)
         # TODO: 处理图片路径，可能需要自定义工具来处理图片
 
         # 如果有恢复数据，则构建 Command 对象以恢复 LangGraph 的执行
@@ -155,46 +144,10 @@ class MainAgentGraph:
         
         # 迭代 LangGraph 的 stream 输出
         # LangGraph 会逐步执行图中的节点，并流式返回状态更新。
+        response_handler = AgentResponseHandler()
         for s in self.graph.stream(stream_input, config=config):
             logger.info(f"LangGraph stream step output: {s}")
-            
-            # 检查是否有中断发生 (例如 question_tool 触发的中断)
-            if "__end__" in s and isinstance(s["__end__"], Interrupt):
-                interrupt_data = s["__end__"].data
-                if "question" in interrupt_data and "options" in interrupt_data:
-                    # 如果是问题请求中断，则生成 ChatResponsePayload 返回给前端
-                    yield ChatResponsePayload(
-                        type="question_request",
-                        content=ChatResponseContent(
-                            question_payload=QuestionRequestPayload(
-                                question=interrupt_data["question"],
-                                options=interrupt_data["options"],
-                                tool_call_id=interrupt_data.get("tool_call_id")
-                            )
-                        )
-                    )
-                    return # 暂停处理，等待用户响应
-
-            # 检查是否有 Agent 状态信息 (例如进入某个节点)
-            if "agent" in s: # Agent 节点执行
-                yield send_agent_msg("thinking", "Agent 正在思考...", current_node="agent")
-            if "tools" in s: # 工具节点执行
-                yield send_agent_msg("tool_calling", "Agent 正在调用工具...", current_node="tools")
-            
-            # 提取最新的消息并转换为 ChatResponsePayload
-            if "messages" in s:
-                latest_message = s["messages"][-1]
-                if isinstance(latest_message, AIMessage):
-                    # 如果是 AI 的文本响应
-                    content_to_send = str(latest_message.content) if not isinstance(latest_message.content, str) else latest_message.content
-                    yield send_text_msg(content_to_send)
-                elif isinstance(latest_message, ToolMessage):
-                    # 如果是工具消息，表示工具执行结果
-                    yield send_agent_msg("tool_result", f"工具 {latest_message.name} 执行完毕。", tool_name=latest_message.name)
-                    # 确保 content 是字符串
-                    content_to_send = str(latest_message.content) if not isinstance(latest_message.content, str) else latest_message.content
-                    yield send_text_msg(content_to_send) # 工具的输出内容
-                # 其他类型的消息根据需要处理
+            yield from response_handler.handle_stream_output(s)
         
         yield send_stop_msg() # 任务结束，发送停止消息
 
@@ -206,25 +159,6 @@ async def create_main_agent_graph() -> MainAgentGraph:
     try:
         from langplatform.tools import core_tools # 注册工具
 
-        # cwd = Path(__file__).parent.parent / "tools"
-        # logger.info(f"Current MCP connection directory: {cwd}")
-        
-        # mcp_command = "uv"
-        # mcp_args = ["run", "python", "mcp_core_tools.py"]
-        # logger.info(f"Attempting to create StdioConnection with command: {mcp_command}, args: {mcp_args}, cwd: {cwd}")
-
-        # connection = StdioConnection(
-        #     transport="stdio", # 明确指定 transport 类型
-        #     command=mcp_command,
-        #     args=mcp_args,
-        #     cwd=cwd,
-        #     encoding="utf-8",
-        # )
-        # logger.info("StdioConnection created successfully.")
-        
-        # logger.info("Attempting to create MultiServerMCPClient and get tools...")
-        # mcp_client = MultiServerMCPClient(connections={"core_tools": connection})
-        # tools = await mcp_client.get_tools()
         tools = core_tools.tools
         logger.info(f"Successfully retrieved {len(tools)} tools.")
         
