@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, Any
 from langchain_core.language_models import BaseChatModel
-from langchain_community.chat_models.openai import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 class LLMManager:
     def __init__(self, config: Dict[str, Any]):
@@ -37,14 +37,9 @@ class LLMManager:
                 temperature=model_config.get("temperature", 0.7),
                 base_url="https://openrouter.ai/api/v1",
                 api_key=api_key,
+                disable_streaming=True,
             )
 
-            # self.models[model_name] = init_chat_model(
-            #     model=model_config.get("model"),
-            #     model_provider=model_config.get("provider"),
-            #     temperature=model_config.get("temperature", 0.7),
-            #     api_key=api_key,
-            # )
         return self.models[model_name]
 
 llm_config = {
