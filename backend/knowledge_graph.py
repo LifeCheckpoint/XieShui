@@ -58,23 +58,23 @@ class Knowledge_Graph(BaseModel):
         return edge_list
 
     def get_out_edge(self, node_id: str):
+        if node_id not in self.nodes:
+            raise ValueError(f"节点ID{node_id}不存在")
         node = self.nodes[node_id]
-        if node.id not in self.nodes:
-            raise ValueError(f"节点ID{node.id}不存在")
         out_edge_list = [self.edges[id] for id in node.out_edge]
         return out_edge_list
 
     def get_in_edge(self, node_id: str):
+        if node_id not in self.nodes:
+            raise ValueError(f"节点ID{node_id}不存在")
         node = self.nodes[node_id]
-        if node.id not in self.nodes:
-            raise ValueError(f"节点ID{node.id}不存在")
         in_edge_list = [self.edges[id] for id in node.in_edge]
         return in_edge_list
 
     def get_neighbours(self, node_id: str):
+        if node_id not in self.nodes:
+            raise ValueError(f"节点ID{node_id}不存在")
         node = self.nodes[node_id]
-        if node.id not in self.nodes:
-            raise ValueError(f"节点ID{node.id}不存在")
         node_list = []
         for edge_id in node.in_edge:
             edge = self.edges[edge_id]
@@ -90,6 +90,19 @@ class Knowledge_Graph(BaseModel):
         new_node_list = [self.nodes[node_id] for node_id in node_list]
         return new_node_list
 
+    def get_out_neighbours(self,node_id:str):
+        if node_id not in self.nodes:
+            raise ValueError(f"节点ID{node_id}不存在")
+        node = self.nodes[node_id]
+        node_list = []
+        for edge_id in node.out_edge:
+            edge = self.edges[edge_id]
+            node_list.append(edge.start_node.id)
+            node_list.append(edge.end_node.id)
+
+        node_list = list(set(node_list))
+        return node_list
+    
     def remove_node(self, node_id: str):
         if node_id not in self.nodes:
             raise ValueError(f"节点ID{node_id}不存在")
@@ -149,6 +162,32 @@ class Knowledge_Graph(BaseModel):
                     queue.append(new_path)
 
         return []  # 没有找到路径
+    
+    def find_path(self,start_node_id,goal_node_id):
+        if start_node_id == goal_node_id:
+            return [start_node_id]
+        
+        queue = deque()
+        queue.append(start_node_id)
+        parent = {start_node_id: None}
+        while queue:
+            current = queue.popleft()
+            
+            if current == goal_node_id:
+                path = []
+                while current is not None: 
+                    path.append(current)
+                    current = parent[current]
+                return path[::-1]
+            
+            current_list = self.get_out_neighbours(current)
+            for neighbour in current_list:
+                if neighbour not in parent:
+                    parent[neighbour] = current
+                    queue.append(neighbour)
+            
+        return 1
+                
     
 if __name__ == '__main__':
     user_1 = Knowledge_Node(name="dht", content="a student of hit")
