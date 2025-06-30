@@ -45,7 +45,7 @@ os.makedirs(TEMP_IMAGE_DIR, exist_ok=True)
 async def send_message(websocket: Any, message: WebSocketMessage):
     """发送 WebSocket 消息到指定客户端"""
     try:
-        message_json = json.dumps(message.model_dump())
+        message_json = json.dumps(message.model_dump(), ensure_ascii=False)
         logger.info(f"Sending message to {websocket.remote_address}: {message_json}")
         await websocket.send(message_json)
     except websockets.exceptions.ConnectionClosedOK:
@@ -79,7 +79,7 @@ async def handle_chat_request_ws(websocket: Any, payload: ChatRequestPayload):
         resume_data = payload.resume_data
 
         with _temp_app.app_context(): # 确保在数据库上下文中执行
-            for response_payload in route_chat(payload.history, payload.current_text, payload.current_image_paths, thread_id, resume_data):
+            async for response_payload in route_chat(payload.history, payload.current_text, payload.current_image_paths, thread_id, resume_data):
                 logger.info(f"Emitting chat_response: {response_payload.model_dump()}")
                 await send_message(websocket, WebSocketMessage(type="chat_response", payload=response_payload.model_dump()))
     except Exception as e:
