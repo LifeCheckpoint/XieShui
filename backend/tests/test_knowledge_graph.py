@@ -192,3 +192,96 @@ def test_remove_edge_nonexistent_edge_raises_error(setup_graph):
     graph, _, _, _, _, _, _, _, _ = setup_graph
     with pytest.raises(ValueError, match="节点IDnonExistentEdge不存在"):
         graph.remove_edge("nonExistentEdge")
+
+def sample_graph():
+    """创建一个测试用的知识图谱"""
+    graph = Knowledge_Graph()
+    
+    # 添加节点
+    node_a = Knowledge_Node(name="A")
+    node_b = Knowledge_Node(name="B")
+    node_c = Knowledge_Node(name="C")
+    node_d = Knowledge_Node(name="D")
+    
+    graph.add_node(node_a)
+    graph.add_node(node_b)
+    graph.add_node(node_c)
+    graph.add_node(node_d)
+    
+    # 添加边 (有向图)
+    edge_ab = Knowledge_Edge(start_node=node_a, end_node=node_b)
+    edge_bc = Knowledge_Edge(start_node=node_b, end_node=node_c)
+    edge_cd = Knowledge_Edge(start_node=node_c, end_node=node_d)
+    edge_ad = Knowledge_Edge(start_node=node_a, end_node=node_d)
+    
+    graph.add_edge(edge_ab)
+    graph.add_edge(edge_bc)
+    graph.add_edge(edge_cd)
+    graph.add_edge(edge_ad)
+    
+    return graph, node_a, node_b, node_c, node_d
+
+def test_find_path_direct_connection(sample_graph):
+    """测试直接连接的节点"""
+    graph, node_a, node_b, _, _ = sample_graph
+    path = graph.find_path(node_a.id, node_b.id)
+    assert path == [node_a.id, node_b.id]
+
+def test_find_path_indirect_connection(sample_graph):
+    """测试间接连接的节点"""
+    graph, node_a, _, _, node_d = sample_graph
+    path = graph.find_path(node_a.id, node_d.id)
+    # 应该返回最短路径 A → D (而不是 A → B → C → D)
+    assert path == [node_a.id, node_d.id]
+
+def test_find_path_same_node(sample_graph):
+    """测试起点和终点是同一个节点"""
+    graph, node_a, _, _, _ = sample_graph
+    path = graph.find_path(node_a.id, node_a.id)
+    assert path == [node_a.id]
+
+def test_find_path_no_path(sample_graph):
+    """测试没有路径的情况"""
+    graph, node_a, _, _, node_d = sample_graph
+    # 创建一个孤立的节点
+    isolated_node = Knowledge_Node(name="Isolated")
+    graph.add_node(isolated_node)
+    
+    path = graph.find_path(node_a.id, isolated_node.id)
+    assert path == []
+
+def test_find_path_invalid_nodes(sample_graph):
+    """测试不存在的节点"""
+    graph, _, _, _, _ = sample_graph
+    with pytest.raises(ValueError):
+        graph.find_path("invalid_start", "invalid_end")
+
+def test_find_path_complex_path(sample_graph):
+    """测试复杂路径"""
+    graph, node_a, node_b, node_c, node_d = sample_graph
+    # 移除直接连接 A → D 的边，强制走 A → B → C → D
+    for edge in graph.edges.values():
+        if edge.start_node.id == node_a.id and edge.end_node.id == node_d.id:
+            graph.remove_edge(edge.id)
+            break
+    
+    path = graph.find_path(node_a.id, node_d.id)
+    assert path == [node_a.id, node_b.id, node_c.id, node_d.id]
+
+def test_find_path_reverse_direction(sample_graph):
+    """测试反向路径(如果边是单向的应该找不到路径)"""
+    graph, node_a, node_b, _, _ = sample_graph
+    # B → A 没有边，应该找不到路径
+    path = graph.find_path(node_b.id, node_a.id)
+    assert path == []
+
+def test_find_path_with_cycle(sample_graph):
+    """测试图中存在环的情况"""
+    graph, node_a, node_b, node_c, _ = sample_graph
+    # 添加一个环 C → A
+    edge_ca = Knowledge_Edge(start_node=node_c, end_node=node_a)
+    graph.add_edge(edge_ca)
+    
+    path = graph.find_path(node_a.id, node_c.id)
+    # 应该返回最短路径 A → B → C 而不是 A → B → C → A → B → C
+    assert path == [node_a.id, node_b.id, node_c.id]

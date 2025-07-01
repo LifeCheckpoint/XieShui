@@ -119,74 +119,48 @@ class Knowledge_Graph(BaseModel):
 
         del self.nodes[node_id]
 
-    def remove_edge(self, edge_id: str):
-
+    def remove_edge(self,edge_id:str):
         if edge_id not in self.edges:
-            raise ValueError(f"节点ID{edge_id}不存在")
+            raise ValueError(f'节点ID{edge_id}不存在')
+            
         edge = self.edges[edge_id]
         edge.start_node.out_edge.remove(edge_id)
         edge.end_node.in_edge.remove(edge_id)
         del self.edges[edge_id]
 
-    def find_path(self, start_id: str, end_id: str) -> List[str]:
-        """使用 BFS 查找两个节点之间的最短路径，返回节点 ID 列表"""
-        if start_id not in self.nodes or end_id not in self.nodes:
+    def find_path(self, start_node_id: str, goal_node_id: str) -> List[str]:
+        if start_node_id not in self.nodes or goal_node_id not in self.nodes:
             raise ValueError("起始或终止节点不存在")
-
-        visited = set()
-        queue = deque()
-        queue.append([start_id])  # 存储路径
-
-        while queue:
-            path = queue.popleft()
-            node_id = path[-1]
-
-            if node_id == end_id:
-                return path  # 找到路径
-
-            if node_id not in visited:
-                visited.add(node_id)
-                # 获取当前节点的所有邻居
-                neighbors = []
-                node = self.nodes[node_id]
-                for edge_id in node.out_edge:
-                    edge = self.edges[edge_id]
-                    neighbors.append(edge.end_node.id)
-                for edge_id in node.in_edge:
-                    edge = self.edges[edge_id]
-                    neighbors.append(edge.start_node.id)
-
-                for neighbor in neighbors:
-                    new_path = list(path)
-                    new_path.append(neighbor)
-                    queue.append(new_path)
-
-        return []  # 没有找到路径
-    
-    def find_path(self,start_node_id,goal_node_id):
+        
         if start_node_id == goal_node_id:
             return [start_node_id]
         
         queue = deque()
         queue.append(start_node_id)
         parent = {start_node_id: None}
+        
         while queue:
-            current = queue.popleft()
+            current_id = queue.popleft()
             
-            if current == goal_node_id:
+            if current_id == goal_node_id:
                 path = []
-                while current is not None: 
-                    path.append(current)
-                    current = parent[current]
+                while current_id is not None:
+                    path.append(current_id)
+                    current_id = parent[current_id]
                 return path[::-1]
             
-            current_list = self.get_out_neighbours(current)
-            for neighbour in current_list:
-                if neighbour not in parent:
-                    parent[neighbour] = current
-                    queue.append(neighbour)
+            neighbors = []
+            node = self.nodes[current_id]
+            for edge_id in node.out_edge:
+                edge = self.edges[edge_id]
+                neighbors.append(edge.end_node.id)
             
-        return 1
+            for neighbor_id in neighbors:
+                if neighbor_id not in parent:
+                    parent[neighbor_id] = current_id
+                    queue.append(neighbor_id)
+        
+        return []  
                 
     
 if __name__ == '__main__':
@@ -216,4 +190,3 @@ if __name__ == '__main__':
     graph.add_edge(edge_1)
     graph.add_edge(edge_2)
     graph.add_edge(edge_3)
-    graph.find_path(user_1.id,user_2.id)
