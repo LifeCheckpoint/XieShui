@@ -2,6 +2,11 @@
 
 面向教与学的 Agent 系统
 
+> [!IMPORTANT]
+> 整体重构，逻辑已迁移到 [XieShui-langgraph](https://github.com/LifeCheckpoint/XieShui-langgraph)
+> 
+> 该仓库将被 Archive
+
 ## Install
 
 ### UV 安装与同步依赖
