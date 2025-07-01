@@ -28,7 +28,7 @@ class Knowledge_Graph(BaseModel):
 
     def add_node(self, node: Knowledge_Node):
         if node.id in self.nodes:
-            raise ValueError(f"节点ID{node.id}已存在")
+            raise ValueError(f"节点ID {node.id} 已存在")
         self.nodes[node.id] = node
 
     def add_edge(self, edge: Knowledge_Edge):
@@ -59,21 +59,21 @@ class Knowledge_Graph(BaseModel):
 
     def get_out_edge(self, node_id: str):
         if node_id not in self.nodes:
-            raise ValueError(f"节点ID{node_id}不存在")
+            raise ValueError(f"节点ID {node_id} 不存在")
         node = self.nodes[node_id]
         out_edge_list = [self.edges[id] for id in node.out_edge]
         return out_edge_list
 
     def get_in_edge(self, node_id: str):
         if node_id not in self.nodes:
-            raise ValueError(f"节点ID{node_id}不存在")
+            raise ValueError(f"节点ID {node_id} 不存在")
         node = self.nodes[node_id]
         in_edge_list = [self.edges[id] for id in node.in_edge]
         return in_edge_list
 
     def get_neighbours(self, node_id: str):
         if node_id not in self.nodes:
-            raise ValueError(f"节点ID{node_id}不存在")
+            raise ValueError(f"节点ID {node_id} 不存在")
         node = self.nodes[node_id]
         node_list = []
         for edge_id in node.in_edge:
@@ -92,7 +92,7 @@ class Knowledge_Graph(BaseModel):
 
     def get_out_neighbours(self,node_id:str):
         if node_id not in self.nodes:
-            raise ValueError(f"节点ID{node_id}不存在")
+            raise ValueError(f"节点ID {node_id} 不存在")
         node = self.nodes[node_id]
         node_list = []
         for edge_id in node.out_edge:
@@ -105,7 +105,7 @@ class Knowledge_Graph(BaseModel):
     
     def remove_node(self, node_id: str):
         if node_id not in self.nodes:
-            raise ValueError(f"节点ID{node_id}不存在")
+            raise ValueError(f"节点ID {node_id} 不存在")
         node = self.nodes[node_id]
         for edge_id in node.in_edge:
             edge = self.edges[edge_id]
