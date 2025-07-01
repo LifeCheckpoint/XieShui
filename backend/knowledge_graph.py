@@ -19,7 +19,7 @@ class Knowledge_Edge(BaseModel):
     title: str = None
     start_node: Knowledge_Node
     end_node: Knowledge_Node
-    description: Optional[str]
+    description: Optional[str] = None
 
 
 class Knowledge_Graph(BaseModel):
