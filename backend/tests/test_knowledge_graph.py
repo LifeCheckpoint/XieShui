@@ -64,7 +64,7 @@ def test_add_node(setup_graph):
 
 def test_add_existing_node_raises_error(setup_graph):
     graph, node_a, _, _, _, _, _, _, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDnodeA已存在"):
+    with pytest.raises(ValueError, match="节点 ID nodeA 已存在"):
         graph.add_node(node_a)
 
 def test_add_edge(setup_graph):
@@ -84,19 +84,19 @@ def test_add_edge_with_nonexistent_start_node_raises_error(setup_graph):
     graph, _, node_b, _, _, _, _, _, _ = setup_graph
     non_existent_node = Knowledge_Node(name="NonExistent", id="nonExistent")
     edge = Knowledge_Edge(start_node=non_existent_node, end_node=node_b, id="edgeNEB", description=None)
-    with pytest.raises(ValueError, match=f"节点ID{non_existent_node.id}不存在"):
+    with pytest.raises(ValueError, match=f"节点 ID {non_existent_node.id} 不存在"):
         graph.add_edge(edge)
 
 def test_add_edge_with_nonexistent_end_node_raises_error(setup_graph):
     graph, node_a, _, _, _, _, _, _, _ = setup_graph
     non_existent_node = Knowledge_Node(name="NonExistent", id="nonExistent")
     edge = Knowledge_Edge(start_node=node_a, end_node=non_existent_node, id="edgeANE", description=None)
-    with pytest.raises(ValueError, match=f"节点ID{non_existent_node.id}不存在"):
+    with pytest.raises(ValueError, match=f"节点 ID {non_existent_node.id} 不存在"):
         graph.add_edge(edge)
 
 def test_add_existing_edge_raises_error(setup_graph):
     graph, _, _, _, _, _, _, edge_ac, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDedgeAC已存在"):
+    with pytest.raises(ValueError, match="节点 ID edgeAC 已存在"):
         graph.add_edge(edge_ac)
 
 def test_get_node(setup_graph):
@@ -132,7 +132,7 @@ def test_get_out_edge(setup_graph):
 
 def test_get_out_edge_nonexistent_node_raises_error(setup_graph):
     graph, _, _, _, _, _, _, _, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDnonExistent不存在"):
+    with pytest.raises(ValueError, match="节点 ID nonExistent 不存在"):
         graph.get_out_edge("nonExistent")
 
 def test_get_in_edge(setup_graph):
@@ -144,7 +144,7 @@ def test_get_in_edge(setup_graph):
 
 def test_get_in_edge_nonexistent_node_raises_error(setup_graph):
     graph, _, _, _, _, _, _, _, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDnonExistent不存在"):
+    with pytest.raises(ValueError, match="节点 ID nonExistent 不存在"):
         graph.get_in_edge("nonExistent")
 
 def test_get_neighbours(setup_graph):
@@ -161,7 +161,7 @@ def test_get_neighbours(setup_graph):
 
 def test_get_neighbours_nonexistent_node_raises_error(setup_graph):
     graph, _, _, _, _, _, _, _, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDnonExistent不存在"):
+    with pytest.raises(ValueError, match="节点 ID nonExistent 不存在"):
         graph.get_neighbours("nonExistent")
 
 def test_remove_node(setup_graph):
@@ -177,7 +177,7 @@ def test_remove_node(setup_graph):
 
 def test_remove_node_nonexistent_node_raises_error(setup_graph):
     graph, _, _, _, _, _, _, _, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDnonExistent不存在"):
+    with pytest.raises(ValueError, match="节点 ID nonExistent 不存在"):
         graph.remove_node("nonExistent")
 
 def test_remove_edge(setup_graph):
@@ -190,7 +190,7 @@ def test_remove_edge(setup_graph):
 
 def test_remove_edge_nonexistent_edge_raises_error(setup_graph):
     graph, _, _, _, _, _, _, _, _ = setup_graph
-    with pytest.raises(ValueError, match="节点IDnonExistentEdge不存在"):
+    with pytest.raises(ValueError, match="节点 ID nonExistentEdge 不存在"):
         graph.remove_edge("nonExistentEdge")
 
 
